@@ -41,7 +41,7 @@ export function openCustomDropdown(targetBtn, eventId, field) {
 
   popover.innerHTML = `
     <div class="custom-popover-search-container">
-      <input type="text" class="custom-popover-search" placeholder="${placeholderText}" autocomplete="off" ${maxLength}>
+      <input type="text" class="custom-popover-search" name="popover-search" placeholder="${placeholderText}" autocomplete="off" ${maxLength}>
     </div>
     <div class="custom-popover-options"></div>
   `;

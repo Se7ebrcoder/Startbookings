@@ -90,7 +90,7 @@ export function renderFinanceiroView() {
           <span class="fin-leg-icon">${icon}</span>
           <span class="fin-leg-label"><span class="fin-leg-tag">${tag}</span>${escapeHtml(label)}</span>
           <span class="fin-input-wrap"><span class="fin-currency">R$</span>
-            <input type="number" inputmode="decimal" class="fin-value-input" data-rec="${escapeHtml(rec.id)}" data-leg="${legKey}" value="${parseFloat(leg.valor) || ''}" placeholder="0,00">
+            <input type="number" inputmode="decimal" class="fin-value-input" name="fin-${legKey}-${escapeHtml(rec.id)}" data-rec="${escapeHtml(rec.id)}" data-leg="${legKey}" value="${parseFloat(leg.valor) || ''}" placeholder="0,00">
           </span></label>`;
       };
 
@@ -99,7 +99,7 @@ export function renderFinanceiroView() {
             <span class="fin-leg-icon">🏨</span>
             <span class="fin-leg-label"><span class="fin-leg-tag fin-leg-tag--alt">EST.</span>Hospedagem</span>
             <span class="fin-input-wrap"><span class="fin-currency">R$</span>
-              <input type="number" inputmode="decimal" class="fin-value-input" data-rec="${escapeHtml(rec.id)}" data-leg="hotel" value="${parseFloat(d.hotel.valor) || ''}" placeholder="0,00">
+              <input type="number" inputmode="decimal" class="fin-value-input" name="fin-hotel-${escapeHtml(rec.id)}" data-rec="${escapeHtml(rec.id)}" data-leg="hotel" value="${parseFloat(d.hotel.valor) || ''}" placeholder="0,00">
             </span></label>`
         : "";
 

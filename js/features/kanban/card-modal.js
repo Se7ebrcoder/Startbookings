@@ -41,7 +41,7 @@ export function openEventCardModal(groupId) {
       <span class="card-dd-text">${escapeHtml(label)}</span>${chevSvg}
     </button>`;
   };
-  const valInput = (artist, leg, val) => `<span class="card-cachet-wrap"><span class="card-cachet-cur">R$</span><input type="number" inputmode="decimal" class="card-logi-input" data-artist="${escapeHtml(artist)}" data-leg="${leg}" value="${parseFloat(val) || ''}" placeholder="0,00"></span>`;
+  const valInput = (artist, leg, val) => `<span class="card-cachet-wrap"><span class="card-cachet-cur">R$</span><input type="number" inputmode="decimal" class="card-logi-input" name="card-logi-${escapeHtml(artist)}-${leg}" data-artist="${escapeHtml(artist)}" data-leg="${leg}" value="${parseFloat(val) || ''}" placeholder="0,00"></span>`;
 
   const lineup = shows.map(s => {
     const col = (appState.tagColors && appState.tagColors[s.artist]) || "#ffcc00";
@@ -65,7 +65,7 @@ export function openEventCardModal(groupId) {
       <div class="card-lineup-vals">
         <label class="card-val">
           <span class="card-val-label">Cachê</span>
-          <span class="card-cachet-wrap"><span class="card-cachet-cur">R$</span><input type="number" inputmode="decimal" class="card-cachet" data-id="${escapeHtml(String(s.id))}" value="${cachet}"></span>
+          <span class="card-cachet-wrap"><span class="card-cachet-cur">R$</span><input type="number" inputmode="decimal" class="card-cachet" name="card-cachet-${escapeHtml(String(s.id))}" data-id="${escapeHtml(String(s.id))}" value="${cachet}"></span>
         </label>
         <span class="card-val-op">+</span>
         <div class="card-val">
@@ -91,7 +91,7 @@ export function openEventCardModal(groupId) {
         </div>
         <div class="card-logi-leg card-logi-leg--hosp">
           <label class="card-logi-hosp">
-            <input type="checkbox" class="card-logi-hosp-toggle" data-artist="${escapeHtml(s.artist || "")}" ${temHosp ? "checked" : ""}>
+            <input type="checkbox" class="card-logi-hosp-toggle" name="card-hosp-${escapeHtml(s.artist || "")}" data-artist="${escapeHtml(s.artist || "")}" ${temHosp ? "checked" : ""}>
             <span>🏨 Hospedagem</span>
           </label>
           ${temHosp ? valInput(s.artist, "hotel", d.hotel && d.hotel.valor) : '<span class="card-logi-hosp-off">desligada</span>'}
@@ -102,7 +102,7 @@ export function openEventCardModal(groupId) {
 
   const checklist = (card.checklist || []).map((it, idx) => `
     <label class="card-check-item">
-      <input type="checkbox" class="card-check" data-idx="${idx}" ${it.feito ? "checked" : ""}>
+      <input type="checkbox" class="card-check" name="card-check-${idx}" data-idx="${idx}" ${it.feito ? "checked" : ""}>
       <span class="card-check-box"></span>
       <span class="card-check-text ${it.feito ? 'done' : ''}">${escapeHtml(it.texto)}</span>
       <button class="card-check-remove" data-idx="${idx}" title="Remover etapa" aria-label="Remover etapa">✕</button>

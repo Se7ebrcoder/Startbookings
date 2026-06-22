@@ -30,14 +30,14 @@ export function addArtistBlock() {
     <div class="form-row-2">
       <div class="form-group">
         <label>Artista</label>
-        <select class="form-control event-artist-input" required>
+        <select class="form-control event-artist-input" name="event-artist" required>
           <option value="" disabled selected>Selecione o artista</option>
           ${appState.artists.map(a => `<option value="${escapeHtml(a)}">${escapeHtml(a)}</option>`).join('')}
         </select>
       </div>
       <div class="form-group">
         <label>Vendido Por</label>
-        <select class="form-control event-seller-input" required>
+        <select class="form-control event-seller-input" name="event-seller" required>
           <option value="" disabled selected>Selecione quem vendeu</option>
           ${appState.sellers.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('')}
         </select>
@@ -46,7 +46,7 @@ export function addArtistBlock() {
     <div class="form-row-2">
       <div class="form-group">
         <label>Status da Negociação</label>
-        <select class="form-control event-status-input" required>
+        <select class="form-control event-status-input" name="event-status" required>
           <option value="antes">Em negociação</option>
           <option value="durante">Confirmado</option>
           <option value="apos">Concluído</option>
@@ -54,7 +54,7 @@ export function addArtistBlock() {
       </div>
       <div class="form-group">
         <label>Valor (R$)</label>
-        <input type="number" class="form-control event-amount-input" min="0" placeholder="0,00" required>
+        <input type="number" class="form-control event-amount-input" name="event-amount" min="0" placeholder="0,00" required>
       </div>
     </div>
   `;

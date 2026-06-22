@@ -297,17 +297,17 @@ export function renderEventTable() {
         <div class="event-group-title">
           <div class="event-group-field">
             <span class="event-group-field-label">Evento</span>
-            <input type="text" class="hidden-inline-input group-title-input" data-key="${safeKey}" data-field="event" value="${safeEvent}" size="${Math.max((g.event || '').length, 5)}">
+            <input type="text" class="hidden-inline-input group-title-input" name="group-event-${safeKey}" data-key="${safeKey}" data-field="event" value="${safeEvent}" size="${Math.max((g.event || '').length, 5)}">
           </div>
           <span class="event-group-separator">•</span>
           <div class="event-group-field">
             <span class="event-group-field-label">Data</span>
-            <input type="text" class="hidden-inline-input group-date-input" data-key="${safeKey}" data-field="date" value="${formattedDate}" style="width: 160px;">
+            <input type="text" class="hidden-inline-input group-date-input" name="group-date-${safeKey}" data-key="${safeKey}" data-field="date" value="${formattedDate}" style="width: 160px;">
           </div>
           <span class="event-group-separator">•</span>
           <div class="event-group-field">
             <span class="event-group-field-label">Local</span>
-            <input type="text" class="hidden-inline-input group-venue-input" data-key="${safeKey}" data-field="venue" value="${safeVenue}" size="${Math.max((g.venue || '').length, 5)}">
+            <input type="text" class="hidden-inline-input group-venue-input" name="group-venue-${safeKey}" data-key="${safeKey}" data-field="venue" value="${safeVenue}" size="${Math.max((g.venue || '').length, 5)}">
           </div>
           <span class="event-group-separator">•</span>
           <div class="event-group-field">
@@ -422,16 +422,16 @@ export function renderEventTable() {
             <button class="inline-edit-select custom-dropdown-btn status-tag status-${e.status}" style="text-align: left;" data-id="${safeId}" data-field="status">${STATUS_LABELS[e.status] || escapeHtml(e.status)}</button>
           </td>
           <td class="text-left">
-            <input type="number" class="inline-edit-input" style="text-align: left; font-weight: 700; width: 100px; color: var(--text-main);" data-id="${safeId}" data-field="amount" value="${e.amount}">
+            <input type="number" class="inline-edit-input" name="amount-${safeId}" style="text-align: left; font-weight: 700; width: 100px; color: var(--text-main);" data-id="${safeId}" data-field="amount" value="${e.amount}">
           </td>
           <td class="price-text text-left" style="color: var(--text-muted);">${logiCost > 0 ? '+' + formatCurrency(logiCost) : '—'}</td>
           <td class="price-text text-left" style="font-weight: 700;">${formatCurrency(totalValue)}</td>
           <td class="text-left">
-            <input type="number" class="inline-edit-input" style="text-align: left; font-weight: 700; width: 100px; color: #30d158;" data-id="${safeId}" data-field="amountReceived" value="${amountReceived}">
+            <input type="number" class="inline-edit-input" name="amountReceived-${safeId}" style="text-align: left; font-weight: 700; width: 100px; color: #30d158;" data-id="${safeId}" data-field="amountReceived" value="${amountReceived}">
           </td>
           <td class="price-text text-left" style="color: #ff453a; font-weight: 700;">${formatCurrency(amountToReceive)}</td>
           <td>
-            <input type="text" class="inline-edit-input" style="width: 120px; font-size: 11px;" placeholder="Obs..." data-id="${safeId}" data-field="financeNotes" value="${safeNotes}">
+            <input type="text" class="inline-edit-input" name="financeNotes-${safeId}" style="width: 120px; font-size: 11px;" placeholder="Obs..." data-id="${safeId}" data-field="financeNotes" value="${safeNotes}">
           </td>
           <td style="font-size:11px; white-space:nowrap;">
             ${(() => {

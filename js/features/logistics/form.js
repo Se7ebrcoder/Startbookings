@@ -54,7 +54,7 @@ export function initLogisticsModule() {
     artistsBox.innerHTML = artists.length === 0
       ? `<span style="color:var(--text-muted); font-size:13px;">Nenhum artista neste evento.</span>`
       : artists.map(a => `<label style="display:flex; gap:8px; align-items:center;">
-          <input type="checkbox" class="logi-artist-check" value="${escapeHtml(a)}"> ${escapeHtml(a)}</label>`).join("");
+          <input type="checkbox" class="logi-artist-check" name="logi-artist-${escapeHtml(a)}" value="${escapeHtml(a)}"> ${escapeHtml(a)}</label>`).join("");
   });
 
   nextBtn.addEventListener("click", () => {
