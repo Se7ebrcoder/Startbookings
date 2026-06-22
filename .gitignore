@@ -1,0 +1,28 @@
+# Dependências
+node_modules/
+
+# Variáveis de ambiente / segredos — NUNCA versionar
+.env
+.env.*
+*.local
+
+# Build / cache da Vercel
+.vercel
+.cache
+
+# Mockups temporários do brainstorm (companion visual)
+.superpowers/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editores
+.vscode/*
+!.vscode/extensions.json
+.idea

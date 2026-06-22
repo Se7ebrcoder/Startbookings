@@ -1,0 +1,18 @@
+# Dependências (a Vercel reinstala se precisar; este site é estático)
+node_modules
+
+# Testes e ferramentas de desenvolvimento
+__tests__
+*.test.js
+jest.config.js
+
+# Arquivos de banco / scripts que NÃO devem ir para o site público
+*.sql
+
+# Utilitários locais e docs internas
+Visualizar_Site.bat
+GEMINI.md
+docs
+.vscode
+.agent
+.claude

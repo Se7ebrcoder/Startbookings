@@ -1,0 +1,278 @@
+/* STARTBOOKINGS ADDITIONAL STYLES: LOGIN & INLINE EDIT */
+
+/* Caixa do hCaptcha (centralizada nos formulários de login/cadastro/recuperação) */
+.captcha-box {
+  display: flex;
+  justify-content: center;
+  margin-top: 14px;
+  min-height: 78px;
+}
+.captcha-box:empty {
+  min-height: 0;
+}
+
+/* Login Overlay */
+.login-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(18, 18, 22, 0.95);
+  backdrop-filter: blur(10px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-overlay.hidden {
+  display: none;
+}
+
+html.logged-in .login-overlay {
+  display: none !important;
+}
+
+.login-box {
+  background: var(--surface-bg);
+  border: 1px solid var(--border-color);
+  padding: 40px;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.auth-panel {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.auth-panel.active-panel {
+  opacity: 1;
+}
+
+#otp-input::placeholder {
+  letter-spacing: normal;
+}
+
+
+/* Inline Edit (ClickUp Style) - Modernized */
+.inline-edit-select,
+.inline-edit-input {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-main);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: all 0.2s ease-in-out;
+  width: 100%;
+  box-sizing: border-box;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.inline-edit-input {
+  cursor: text;
+}
+
+.inline-edit-select {
+  cursor: pointer;
+}
+
+/* Custom styling for select to hide default arrow and use a modern one */
+.inline-edit-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.3)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 14px;
+  padding-right: 28px;
+  /* space for arrow */
+}
+
+.inline-edit-select:hover,
+.inline-edit-select:focus {
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+}
+
+.inline-edit-select:hover,
+.inline-edit-input:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  background-color: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.inline-edit-select:focus,
+.inline-edit-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  background-color: rgba(255, 204, 0, 0.05);
+  box-shadow: 0 0 0 3px rgba(255, 204, 0, 0.15);
+  transform: translateY(0);
+}
+
+.inline-edit-input {
+  cursor: text;
+}
+
+/* Esconder setinhas (spinners) dos inputs numéricos */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  appearance: none;
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+  /* Firefox */
+}
+
+/* Status colors with modern badge look */
+.inline-status-antes {
+  background-color: #ff453a !important;
+  border-color: #ff453a !important;
+  color: #ffffff !important;
+  font-weight: 600;
+}
+
+.inline-status-durante {
+  background-color: #ff9f0a !important;
+  /* Orange/Yellow for better contrast with white text */
+  border-color: #ff9f0a !important;
+  color: #ffffff !important;
+  font-weight: 600;
+}
+
+.inline-status-apos { 
+  background-color: #30d158 !important; 
+  border-color: #30d158 !important;
+  color: #ffffff !important; 
+  font-weight: 600; 
+}
+
+/* Custom Popover (Notion/ClickUp style dropdown) */
+@keyframes popoverFadeIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.custom-popover {
+  position: absolute;
+  z-index: 1000;
+  width: 260px;
+  max-height: 320px;
+  background: #1a1a20; /* Fundo sólido para não ficar transparente */
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: popoverFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.custom-popover-search-container {
+  padding: 12px;
+  border-bottom: 1px solid var(--border-color);
+  background: #1a1a20;
+}
+
+.custom-popover-search {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-main);
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.custom-popover-search:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(255, 204, 0, 0.15);
+}
+
+.custom-popover-options {
+  padding: 8px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.custom-popover-options::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-popover-options::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.custom-option-item {
+  display: flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-main);
+  transition: all 0.1s ease;
+  border: 1px solid transparent;
+}
+
+.custom-option-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Specific colored tag styles inside the popover */
+.custom-option-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  border: 1px solid transparent;
+  pointer-events: none; /* Let the parent item handle clicks */
+  text-align: left;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.custom-option-create {
+  margin-top: 4px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 8px;
+  color: #9a9a9f;
+  font-style: italic;
+}
+
+.custom-option-create:hover {
+  background: rgba(255, 204, 0, 0.1);
+  color: var(--primary-color);
+}
+
+/* Ensure dropdown options have solid background so text is readable */
+.inline-edit-select option {
+  background: var(--surface-bg, #1c1c22);
+  color: var(--text-main, #ffffff);
+  font-weight: normal;
+}
+
+/* Add a subtle animation when the value changes (optional, handled by CSS transition) */

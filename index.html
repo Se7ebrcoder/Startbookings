@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StartBookings - Gestão de Carreiras</title>
+  <meta name="description" content="StartBookings — plataforma de gestão de carreiras e booking de artistas: agenda de shows, faturamento, metas e equipe.">
+  <meta name="theme-color" content="#ffcc00">
+  <meta name="color-scheme" content="dark">
+  <!-- Sistema interno com login: não indexar em buscadores -->
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="favicon.ico?v=2" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=2">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png?v=2">
+  <link rel="stylesheet" href="style.css?v=21">
+  <link rel="stylesheet" href="styles-login.css?v=3">
+  <link rel="stylesheet" href="styles-colorpicker.css?v=2">
+  <!-- Chart.js CDN (versão travada + verificação de integridade SRI) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"
+          integrity="sha384-dug+JxfBvklEQdJ4AYuBBAIScUz0bVN73xpy273gcAwHjb3qI0fXmuYNaNfdyYJG"
+          crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <!-- Boot: anti-flicker + lógica que antes era inline (CSP sem unsafe-inline) -->
+  <script src="boot.js?v=1"></script>
+
+  <!-- Supabase CDN (versão travada 2.108.1 + verificação de integridade SRI) -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2.108.1/dist/umd/supabase.js"
+          integrity="sha384-EjUdIVmzWliPzdzhxZ9ZoO0etXLKWuUPUftAGxP6qH6Lm4oLwoLaJR0Ba4pIDiDL"
+          crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <!-- hCaptcha (proteção contra bots; render explícito p/ os 3 formulários) -->
+  <script src="https://js.hcaptcha.com/1/api.js?onload=onHcaptchaLoad&render=explicit" async defer></script>
+</head>
+
+<body>
+
+  <div id="app-loading" class="app-loading" style="display:none;" aria-live="polite" aria-label="Carregando">
+    <div class="app-spinner"></div>
+    <span>Carregando seus dados...</span>
+  </div>
+
+  <!-- LOGIN OVERLAY -->
+  <div class="login-overlay" id="login-overlay">
+    <div class="login-box" id="auth-panel-container">
+
+      <!-- PANEL 1: LOGIN -->
+      <div id="panel-login" class="auth-panel active-panel">
+        <div class="logo-container" style="justify-content: center; margin-bottom: 24px;">
+          <img src="logo.png" alt="StartBookings Logo"
+            style="height: 100px; width: auto; max-width: 100%; margin-left: -15px;">
+        </div>
+        <h2 style="color: white; margin-bottom: 10px; text-align: center;">Bem-vindo</h2>
+        <p style="color: var(--text-muted); text-align: center; margin-bottom: 30px;">Faça login para acessar o sistema
+        </p>
+
+        <form id="login-form">
+          <div class="form-group">
+            <label for="login-username">E-mail ou Usuário/Artista</label>
+            <input type="text" id="login-username" class="form-control"
+              placeholder="Ex: contato@email.com ou nome do projeto" required>
+          </div>
+          <div class="form-group" id="password-group">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <label for="login-password">Senha</label>
+              <a href="#" id="link-forgot-password" data-switch-panel="panel-forgot"
+                style="font-size: 12px; color: var(--yellow-primary); text-decoration: none;">Esqueci minha senha</a>
+            </div>
+            <input type="password" id="login-password" class="form-control" placeholder="Sua senha">
+          </div>
+          <div id="captcha-login" class="captcha-box"></div>
+          <button type="submit" class="btn-primary"
+            style="width: 100%; justify-content: center; margin-top: 10px;">Entrar</button>
+        </form>
+        <div style="text-align: center; margin-top: 20px; font-size: 14px; color: var(--text-muted);">
+          Ainda não tem uma conta? <a href="#" id="link-register" data-switch-panel="panel-register"
+            style="color: var(--yellow-primary); text-decoration: none; font-weight: 600;">Criar Conta</a>
+        </div>
+      </div>
+
+      <!-- PANEL 2: REGISTER -->
+      <div id="panel-register" class="auth-panel" style="display: none;">
+        <div class="logo-container" style="justify-content: center; margin-bottom: 20px;">
+          <img src="logo.png" alt="StartBookings Logo"
+            style="height: 80px; width: auto; max-width: 100%; margin-left: -15px;">
+        </div>
+        <h3 style="color: white; margin-bottom: 5px; text-align: center;">Criar Conta</h3>
+        <p style="color: var(--text-muted); text-align: center; margin-bottom: 20px; font-size: 13px;">Cadastre-se para
+          acessar a plataforma</p>
+
+        <form id="register-form">
+          <div class="form-group">
+            <label for="reg-name">Nome Completo</label>
+            <input type="text" id="reg-name" class="form-control" placeholder="Seu nome" required>
+          </div>
+          <div class="form-group">
+            <label for="reg-email">E-mail</label>
+            <input type="email" id="reg-email" class="form-control" placeholder="seu@email.com" required>
+          </div>
+          <div class="form-group">
+            <label for="reg-password">Senha</label>
+            <input type="password" id="reg-password" class="form-control" placeholder="Crie uma senha" required
+              minlength="6">
+          </div>
+          <div id="captcha-register" class="captcha-box"></div>
+          <button type="submit" class="btn-primary"
+            style="width: 100%; justify-content: center; margin-top: 10px;">Cadastrar</button>
+        </form>
+        <div style="text-align: center; margin-top: 20px; font-size: 14px; color: var(--text-muted);">
+          Já tem conta? <a href="#" id="link-back-login" data-switch-panel="panel-login"
+            style="color: var(--yellow-primary); text-decoration: none; font-weight: 600;">Fazer Login</a>
+        </div>
+      </div>
+
+      <!-- PANEL 3: FORGOT PASSWORD (EMAIL) -->
+      <div id="panel-forgot" class="auth-panel" style="display: none;">
+        <h3 style="color: white; margin-bottom: 5px; text-align: center;">Recuperar Senha</h3>
+        <p style="color: var(--text-muted); text-align: center; margin-bottom: 20px; font-size: 13px;">Digite o seu
+          e-mail cadastrado para receber um código de recuperação.</p>
+
+        <form id="forgot-form">
+          <div class="form-group">
+            <label for="forgot-email">E-mail Cadastrado</label>
+            <input type="email" id="forgot-email" class="form-control" placeholder="seu@email.com" required>
+          </div>
+          <div id="captcha-forgot" class="captcha-box"></div>
+          <button type="submit" class="btn-primary" id="btn-send-otp"
+            style="width: 100%; justify-content: center; margin-top: 10px;">Enviar Código</button>
+        </form>
+        <div style="text-align: center; margin-top: 20px; font-size: 14px; color: var(--text-muted);">
+          <a href="#" id="link-back-login2" data-switch-panel="panel-login"
+            style="color: var(--text-muted); text-decoration: underline;">Voltar para o
+            login</a>
+        </div>
+      </div>
+
+      <!-- PANEL 5: RESET PASSWORD -->
+      <div id="panel-reset" class="auth-panel" style="display: none;">
+        <h3 style="color: white; margin-bottom: 5px; text-align: center;">Nova Senha</h3>
+        <p style="color: var(--text-muted); text-align: center; margin-bottom: 20px; font-size: 13px;">Crie uma nova
+          senha para sua conta.</p>
+
+        <form id="reset-form">
+          <div class="form-group">
+            <label for="reset-password">Nova Senha</label>
+            <input type="password" id="reset-password" class="form-control" placeholder="Digite a nova senha" required
+              minlength="6">
+          </div>
+          <button type="submit" class="btn-primary"
+            style="width: 100%; justify-content: center; margin-top: 10px;">Salvar e Entrar</button>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Backdrop for mobile sidebar -->
+  <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="logo-container">
+      <img src="logo.png" alt="StartBookings Logo"
+        style="height: 150px; width: auto; max-width: 100%; margin-left: 30px; margin-top: -34px; margin-bottom: -60px;">
+    </div>
+
+    <nav>
+      <ul class="sidebar-menu">
+        <li>
+          <a class="menu-item" role="button" tabindex="0" data-view="dashboard">
+            <svg viewBox="0 0 24 24">
+              <rect x="3" y="3" width="7" height="9" rx="1"></rect>
+              <rect x="14" y="3" width="7" height="5" rx="1"></rect>
+              <rect x="14" y="12" width="7" height="9" rx="1"></rect>
+              <rect x="3" y="16" width="7" height="5" rx="1"></rect>
+            </svg>
+            Dashboard
+          </a>
+        </li>
+        <li id="nav-clientes-item">
+          <a class="menu-item" role="button" tabindex="0" data-view="clients">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+            Clientes
+          </a>
+        </li>
+        <li>
+          <a class="menu-item" role="button" tabindex="0" data-view="table">
+            <svg viewBox="0 0 24 24">
+              <path d="M3 3h18v18H3z"></path>
+              <path d="M3 9h18M3 15h18M9 3v18M15 3v18"></path>
+            </svg>
+            Tabela de Eventos
+          </a>
+        </li>
+        <li>
+          <a class="menu-item" role="button" tabindex="0" data-view="timeline">
+            <svg viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            Linha do Tempo
+          </a>
+        </li>
+        <li id="nav-kanban-item">
+          <a class="menu-item" role="button" tabindex="0" data-view="kanban">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="9" y1="3" x2="9" y2="21"></line>
+              <line x1="15" y1="3" x2="15" y2="21"></line>
+            </svg>
+            Kanban
+          </a>
+        </li>
+
+        <li id="nav-logistica-item">
+          <a class="menu-item" role="button" tabindex="0" data-view="logistics">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="1" y="3" width="15" height="13"></rect>
+              <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+              <circle cx="5.5" cy="18.5" r="2.5"></circle>
+              <circle cx="18.5" cy="18.5" r="2.5"></circle>
+            </svg>
+            Logística
+          </a>
+        </li>
+
+        <li id="nav-financeiro-item">
+          <a class="menu-item" role="button" tabindex="0" data-view="financeiro">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="1" x2="12" y2="23"></line>
+              <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+            </svg>
+            Financeiro
+          </a>
+        </li>
+
+        <li id="nav-settings-item">
+          <a class="menu-item" role="button" tabindex="0" data-view="settings">
+            <svg viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path
+                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z">
+              </path>
+            </svg>
+            Configurações
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-info-wrapper" style="display: flex; align-items: center; gap: 12px; margin-bottom: 15px;">
+        <div class="user-avatar" id="sidebar-user-avatar">I</div>
+        <div class="user-info">
+          <span class="user-name" id="sidebar-user-name">Ingrid</span>
+          <span class="user-role" id="sidebar-user-role">Administrador</span>
+        </div>
+      </div>
+      <button class="btn-secondary" id="logout-btn"
+        style="width: 100%; justify-content: center; padding: 10px; font-size: 13px;">
+        <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; margin-right: 6px;">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+          <polyline points="16 17 21 12 16 7"></polyline>
+          <line x1="21" y1="12" x2="9" y2="12"></line>
+        </svg>
+        Sair
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN VIEW WRAPPER -->
+  <div class="main-wrapper">
+
+    <!-- TOP HEADER -->
+    <header class="top-header">
+      <button class="menu-toggle-btn" id="menu-toggle-btn" aria-label="Abrir menu de navegação" aria-expanded="false" aria-controls="sidebar">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+      <div class="header-title-container">
+        <h1 class="page-title" id="page-title">Dashboard</h1>
+        <span class="page-subtitle" id="page-subtitle">Visão geral do faturamento e lançamentos.</span>
+      </div>
+
+      <div class="header-actions">
+        <span id="sync-status" class="sync-status" aria-live="polite"></span>
+        <!-- Annual Billing KPI on Header -->
+        <div class="stat-badge-header">
+          <span class="label">Total Faturado Anual</span>
+          <span class="value" id="header-total-revenue">R$ 0,00</span>
+        </div>
+
+        <!-- Removed Interactive Role Switcher for login flow -->
+      </div>
+    </header>
+
+    <!-- CONTENT BODY (SPA SECTIONS) -->
+    <main class="content-body">
+
+      <!-- 1. DASHBOARD VIEW -->
+      <section id="dashboard-view" class="view-section">
+        <!-- KPI Cards Grid -->
+        <div class="kpi-grid">
+          <!-- Total Revenue Card -->
+          <div class="kpi-card">
+            <div class="kpi-icon-container">
+              <svg viewBox="0 0 24 24">
+                <line x1="12" y1="1" x2="12" y2="23"></line>
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+              </svg>
+            </div>
+            <span class="kpi-label">Faturamento Total</span>
+            <span class="kpi-value" id="kpi-total-revenue">R$ 0,00</span>
+            <div class="kpi-meta">
+              <span>Faturado neste ano</span>
+            </div>
+          </div>
+
+          <!-- Event Count Card -->
+          <div class="kpi-card">
+            <div class="kpi-icon-container">
+              <svg viewBox="0 0 24 24">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+            </div>
+            <span class="kpi-label">Total de Shows</span>
+            <span class="kpi-value" id="kpi-total-shows">0</span>
+            <div class="kpi-meta">
+              <span>Eventos cadastrados</span>
+            </div>
+          </div>
+
+          <!-- Goal Tracking Card -->
+          <div class="kpi-card">
+            <div class="kpi-icon-container">
+              <svg viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10"></circle>
+                <circle cx="12" cy="12" r="6"></circle>
+                <circle cx="12" cy="12" r="2"></circle>
+              </svg>
+            </div>
+            <span class="kpi-label">Meta de Faturamento</span>
+            <span class="kpi-value" id="kpi-goal-percent">0%</span>
+            <div class="kpi-meta">
+              Meta: <span id="kpi-goal-value">R$ 0,00</span>
+            </div>
+            <div class="progress-container">
+              <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="dashboard-progress-fill"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pending Negotiations Card -->
+          <div class="kpi-card">
+            <div class="kpi-icon-container">
+              <svg viewBox="0 0 24 24">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+              </svg>
+            </div>
+            <span class="kpi-label">Em Negociação</span>
+            <span class="kpi-value" id="kpi-active-negotiations">0</span>
+            <div class="kpi-meta">
+              <span>Status "Durante"</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts Grid -->
+        <div class="charts-grid">
+          <!-- Monthly Revenue Chart -->
+          <div class="chart-card">
+            <div class="chart-header">
+              <h3 class="chart-title">Faturamento por Mês (R$)</h3>
+            </div>
+            <div class="chart-container">
+              <canvas id="monthlyRevenueChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Status Distribution Chart -->
+          <div class="chart-card">
+            <div class="chart-header">
+              <h3 class="chart-title">Status dos Eventos</h3>
+            </div>
+            <div class="chart-container">
+              <canvas id="statusChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CLIENTS VIEW -->
+      <section id="clients-view" class="view-section">
+        <div class="filter-bar">
+          <div class="filters-group">
+            <div class="search-box-container">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input type="text" id="client-search" class="search-input" placeholder="Buscar cliente...">
+            </div>
+          </div>
+          <button class="btn-primary" id="open-new-client-btn">
+            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            Novo Cliente
+          </button>
+        </div>
+        <div id="clients-list-container" class="events-list-container"></div>
+      </section>
+
+      <!-- 2. TABLE VIEW (ClickUp-like Event Table) -->
+      <section id="table-view" class="view-section">
+        <!-- ClickUp style Filter & Search Bar -->
+        <div class="filter-bar">
+          <div class="filters-group">
+            <div class="search-box-container">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input type="text" id="table-search" class="search-input" placeholder="Buscar por evento ou local...">
+            </div>
+
+            <!-- Artist Filter -->
+            <div class="filter-select-wrapper" id="filter-artist-wrapper">
+              <label for="filter-artist">Artista:</label>
+              <select id="filter-artist" class="filter-select">
+                <option value="all">Todos os Artistas</option>
+                <!-- Filled in dynamically -->
+              </select>
+            </div>
+
+            <!-- Seller Filter -->
+            <div class="filter-select-wrapper" id="filter-seller-wrapper">
+              <label for="filter-seller">Vendido Por:</label>
+              <select id="filter-seller" class="filter-select">
+                <option value="all">Toda a Equipe</option>
+                <!-- Filled in dynamically -->
+              </select>
+            </div>
+
+            <!-- Status Filter -->
+            <div class="filter-select-wrapper">
+              <label for="filter-status">Status:</label>
+              <select id="filter-status" class="filter-select">
+                <option value="all">Todos os Status</option>
+                <option value="antes">Em negociação</option>
+                <option value="durante">Confirmado</option>
+                <option value="apos">Concluído</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Add Event Button (visible for admin/manager) -->
+          <button class="btn-primary" id="open-new-event-btn">
+            <svg viewBox="0 0 24 24">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Novo Show
+          </button>
+        </div>
+
+
+
+        <!-- Container for Grouped Events (Accordion) -->
+        <div id="events-list-container" class="events-list-container">
+          <!-- Filled dynamically in app.js -->
+        </div>
+      </section>
+
+      <!-- 3. TIMELINE VIEW -->
+      <section id="timeline-view" class="view-section">
+        <div class="timeline-section-header">
+          <div class="filters-group" style="justify-content: center; margin-bottom: 30px;">
+            <div class="filter-select-wrapper" id="timeline-artist-filter-wrapper">
+              <label for="timeline-artist-select">Selecionar Artista para Linha do Tempo:</label>
+              <select id="timeline-artist-select" class="filter-select">
+                <!-- Filled in dynamically -->
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Vertical Timeline -->
+        <div class="timeline-wrapper" id="timeline-container">
+          <!-- Filled in dynamically in app.js -->
+        </div>
+      </section>
+
+      <!-- 4. KANBAN VIEW -->
+      <section id="kanban-view" class="view-section">
+        <div class="kanban-board" id="kanban-board">
+          <!-- TODO Column -->
+          <div class="kanban-column column-todo">
+            <div class="kanban-column-header">A Fazer</div>
+            <div class="kanban-cards-container" data-status="todo"></div>
+          </div>
+          
+          <!-- IN PROGRESS Column -->
+          <div class="kanban-column column-progress">
+            <div class="kanban-column-header">Em Andamento</div>
+            <div class="kanban-cards-container" data-status="progress">
+            </div>
+          </div>
+          
+          <!-- DONE Column -->
+          <div class="kanban-column column-done">
+            <div class="kanban-column-header">
+              <span>Concluído</span>
+            </div>
+            <div class="kanban-cards-container" data-status="done">
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- LOGISTICS VIEW -->
+      <section id="logistics-view" class="view-section">
+        <div id="logistics-deadline-alert"></div>
+        <div class="kpi-grid" id="logistics-kpis"></div>
+        <div class="filter-bar" style="margin-top: 24px;">
+          <div class="filters-group"><h3 class="chart-title">Logísticas</h3></div>
+          <button class="btn-primary" id="open-new-logistics-btn">
+            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            Criar nova logística
+          </button>
+        </div>
+        <div id="logistics-list" class="events-list-container"></div>
+      </section>
+
+<section id="financeiro-view" class="view-section">
+  <div id="financeiro-list"></div>
+</section>
+
+      <!-- 5. CONFIGURATIONS VIEW -->
+      <section id="settings-view" class="view-section">
+        <div class="config-layout">
+          <!-- Annual Goal Card -->
+          <div class="settings-card">
+            <h3 class="settings-section-title">Metas de Faturamento</h3>
+            <div class="form-group">
+              <label for="settings-goal-input">Meta Anual de Faturamento (R$)</label>
+              <input type="number" id="settings-goal-input" class="form-control" placeholder="Ex: 5000000">
+            </div>
+            <button class="btn-primary" id="save-goal-btn">Salvar Meta</button>
+          </div>
+
+          <!-- Artist Management Card -->
+          <div class="settings-card" id="admin-artists-card">
+            <h3 class="settings-section-title">Gerenciar Artistas</h3>
+            <form id="add-artist-form">
+              <div class="form-row-3" style="align-items: flex-end;">
+                <div class="form-group" style="margin-bottom: 0;">
+                  <label for="new-artist-name">Nome do Artista</label>
+                  <input type="text" id="new-artist-name" class="form-control" placeholder="Ex: Nome do artista"
+                    required>
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                  <label for="new-artist-email">E-mail de Acesso (opcional)</label>
+                  <input type="email" id="new-artist-email" class="form-control" placeholder="Ex: contato@email.com">
+                </div>
+                <div class="form-group" style="margin-bottom: 0; width: 60px;">
+                  <label for="new-artist-color">Cor</label>
+                  <input type="color" id="new-artist-color" class="form-control" value="#ffcc00"
+                    style="padding: 0; height: 38px; cursor: pointer;">
+                </div>
+              </div>
+              <button type="submit" class="btn-primary" style="margin-top: 15px;">Adicionar Artista</button>
+            </form>
+
+            <div class="list-manager-container" id="config-artists-list">
+              <!-- Filled in dynamically -->
+            </div>
+          </div>
+
+          <!-- Sellers/Managers Management Card -->
+          <div class="settings-card" id="admin-sellers-card">
+            <h3 class="settings-section-title">Gerenciar Equipe de Vendas (Gerentes)</h3>
+            <form id="add-seller-form">
+              <div class="form-row-3" style="align-items: flex-end;">
+                <div class="form-group" style="margin-bottom: 0;">
+                  <label for="new-seller-name">Nome do Gerente / Vendedor</label>
+                  <input type="text" id="new-seller-name" class="form-control" placeholder="Ex: Nome do artista"
+                    required>
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                  <label for="new-seller-email">E-mail de Acesso (opcional)</label>
+                  <input type="email" id="new-seller-email" class="form-control" placeholder="Ex: artista@empresa.com">
+                </div>
+                <div class="form-group" style="margin-bottom: 0; width: 60px;">
+                  <label for="new-seller-color">Cor</label>
+                  <input type="color" id="new-seller-color" class="form-control" value="#9a9a9f"
+                    style="padding: 0; height: 38px; cursor: pointer;">
+                </div>
+              </div>
+              <button type="submit" class="btn-primary" style="margin-top: 15px;">Adicionar à Equipe</button>
+            </form>
+
+            <div class="list-manager-container" id="config-sellers-list">
+              <!-- Filled in dynamically -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- MODAL FOR ADDING NEW EVENT MANUALLY -->
+  <div class="modal-overlay" id="new-event-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Cadastrar Novo Evento</h3>
+        <button class="modal-close" id="close-event-modal-btn" aria-label="Fechar">&times;</button>
+      </div>
+      <form id="new-event-form">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="event-client">Dono do Evento (Cliente) *</label>
+            <select id="event-client" class="form-control" required>
+              <option value="" disabled selected>Selecione o cliente</option>
+            </select>
+            <div id="event-client-quickadd" style="display:none; margin-top:10px; padding:12px; border:1px dashed rgba(255,204,0,0.3); border-radius:10px;">
+              <p style="font-size:13px; color:var(--text-muted); margin-bottom:8px;">Deseja adicionar este cliente ao catálogo?</p>
+              <input type="text" id="event-client-new-name" class="form-control" placeholder="Nome do cliente" style="margin-bottom:8px;">
+              <input type="text" id="event-client-new-contact" class="form-control" placeholder="Contato do produtor (WhatsApp/e-mail)" style="margin-bottom:8px;">
+              <button type="button" class="btn-primary" id="event-client-quickadd-save" style="width:100%; justify-content:center;">Adicionar e vincular</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="event-name">Nome do Evento</label>
+            <input type="text" id="event-name" class="form-control" placeholder="Ex: Drop Open Air" required>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="event-date">Data do Evento</label>
+              <input type="date" id="event-date" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label for="event-venue">Local/Venue</label>
+              <input type="text" id="event-venue" class="form-control" placeholder="Ex: Rancho Azevedo" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="event-estado">Estado (UF)</label>
+            <select id="event-estado" class="form-control" required>
+              <option value="" disabled selected>Selecione o estado</option>
+              <option value="AC">AC - Acre</option>
+              <option value="AL">AL - Alagoas</option>
+              <option value="AP">AP - Amapá</option>
+              <option value="AM">AM - Amazonas</option>
+              <option value="BA">BA - Bahia</option>
+              <option value="CE">CE - Ceará</option>
+              <option value="DF">DF - Distrito Federal</option>
+              <option value="ES">ES - Espírito Santo</option>
+              <option value="GO">GO - Goiás</option>
+              <option value="MA">MA - Maranhão</option>
+              <option value="MT">MT - Mato Grosso</option>
+              <option value="MS">MS - Mato Grosso do Sul</option>
+              <option value="MG">MG - Minas Gerais</option>
+              <option value="PA">PA - Pará</option>
+              <option value="PB">PB - Paraíba</option>
+              <option value="PR">PR - Paraná</option>
+              <option value="PE">PE - Pernambuco</option>
+              <option value="PI">PI - Piauí</option>
+              <option value="RJ">RJ - Rio de Janeiro</option>
+              <option value="RN">RN - Rio Grande do Norte</option>
+              <option value="RS">RS - Rio Grande do Sul</option>
+              <option value="RO">RO - Rondônia</option>
+              <option value="RR">RR - Roraima</option>
+              <option value="SC">SC - Santa Catarina</option>
+              <option value="SP">SP - São Paulo</option>
+              <option value="SE">SE - Sergipe</option>
+              <option value="TO">TO - Tocantins</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="event-contract-status">Status do Contrato</label>
+            <select id="event-contract-status" class="form-control">
+              <option value="pendente" selected>Pendente</option>
+              <option value="enviado">Enviado</option>
+              <option value="assinado">Assinado</option>
+            </select>
+          </div>
+
+          <div id="artist-list-container">
+            <!-- Artist blocks will be dynamically inserted here -->
+          </div>
+
+          <button type="button" id="add-artist-block-btn" class="btn-secondary"
+            style="width: 100%; margin-top: 8px; display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 13px; padding: 12px; border-style: dashed; border-color: rgba(255, 204, 0, 0.2); color: var(--yellow-primary); border-radius: 12px;">
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"
+              stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Adicionar outro artista neste evento
+          </button>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" id="cancel-event-modal-btn">Cancelar</button>
+          <button type="submit" class="btn-primary">Confirmar Cadastro</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- COLOR PICKER POPOVER -->
+  <div class="color-picker-popover hidden" id="color-picker-popover">
+    <div class="color-picker-grid" id="color-picker-grid">
+      <!-- Filled dynamically -->
+    </div>
+  </div>
+
+
+  <div class="modal-overlay" id="event-card-modal">
+    <div class="modal-content" style="max-width: 560px;">
+      <div class="modal-header">
+        <h2 id="event-card-title">Evento</h2>
+        <button class="modal-close" id="close-event-card-modal" aria-label="Fechar">✕</button>
+      </div>
+      <div class="modal-body" id="event-card-body"><!-- preenchido por openEventCardModal --></div>
+    </div>
+  </div>
+
+  <!-- NEW/EDIT CLIENT MODAL -->
+  <div class="modal-overlay" id="client-modal" style="z-index: 10000; align-items: center; justify-content: center;">
+    <div class="modal-content" style="max-width: 440px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="client-modal-title">Novo Cliente</h3>
+        <button class="modal-close" id="close-client-modal-btn" aria-label="Fechar">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 20px;">
+        <input type="hidden" id="client-id-input">
+        <div class="form-group">
+          <label for="client-name-input">Nome do Cliente / Promotor *</label>
+          <input type="text" id="client-name-input" class="form-control" placeholder="Ex: Produtora XYZ" required>
+        </div>
+        <div class="form-group">
+          <label for="client-contact-input">Contato do Produtor (WhatsApp, telefone ou e-mail)</label>
+          <input type="text" id="client-contact-input" class="form-control" placeholder="Ex: (11) 99999-9999">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" id="cancel-client-modal-btn">Cancelar</button>
+        <button type="button" class="btn-primary" id="save-client-btn">Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOGISTICS CREATE (cascade) MODAL -->
+  <div class="modal-overlay" id="logistics-create-modal">
+    <div class="modal-content" style="max-width: 520px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Criar nova logística</h3>
+        <button class="modal-close" id="close-logistics-create-btn" aria-label="Fechar">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="logistics-event-select">Evento</label>
+          <select id="logistics-event-select" class="form-control">
+            <option value="" disabled selected>Selecione o evento</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Artistas (mesma rota)</label>
+          <div id="logistics-artists-container" style="display:flex; flex-direction:column; gap:8px;"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" id="cancel-logistics-create-btn">Cancelar</button>
+        <button type="button" class="btn-primary" id="logistics-create-next-btn">Continuar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOGISTICS FORM MODAL -->
+  <div class="modal-overlay" id="logistics-form-modal">
+    <div class="modal-content" style="max-width: 720px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="logistics-form-title">Logística</h3>
+        <button class="modal-close" id="close-logistics-form-btn" aria-label="Fechar">&times;</button>
+      </div>
+      <div class="modal-body" id="logistics-form-body"></div>
+      <div class="modal-footer" style="justify-content: space-between;">
+        <span id="logistics-form-artists" style="font-size:12px; color:var(--text-muted);"></span>
+        <div style="display:flex; gap:10px;">
+          <button type="button" class="btn-secondary" id="logistics-save-draft-btn">Salvar Rascunho</button>
+          <button type="button" class="btn-primary" id="logistics-finalize-btn">Finalizar Logística</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOGISTICS VIEW (read-only) MODAL -->
+  <div class="modal-overlay" id="logistics-view-modal">
+    <div class="modal-content" style="max-width: 680px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="logistics-view-title">Logística</h3>
+        <button class="modal-close" id="close-logistics-view-btn" aria-label="Fechar">&times;</button>
+      </div>
+      <div class="modal-body" id="logistics-view-body"></div>
+      <div class="modal-footer" style="justify-content: space-between;">
+        <button type="button" class="btn-secondary" id="logistics-export-pdf-btn">Exportar PDF</button>
+        <button type="button" class="btn-primary" id="logistics-view-close-footer-btn">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ÁREA DE IMPRESSÃO (preenchida ao exportar PDF) -->
+  <div id="logistics-print-area"></div>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div class="toast-msg" id="toast" style="display: flex; align-items: center; justify-content: space-between;">
+    <span id="toast-text">Ação concluída com sucesso!</span>
+    <button id="toast-close" style="background:none;border:none;color:inherit;font-size:18px;cursor:pointer;margin-left:12px;padding:0;">&times;</button>
+  </div>
+
+  <!-- CENTERED WARNING TOAST -->
+  <div class="toast-center" id="toast-center" style="display: flex; align-items: center; justify-content: space-between;">
+    <span id="toast-center-text">Aviso importante!</span>
+    <button id="toast-center-close" style="background:none;border:none;color:inherit;font-size:18px;cursor:pointer;margin-left:12px;padding:0;">&times;</button>
+  </div>
+
+  <!-- CUSTOM CONFIRM MODAL -->
+  <div class="modal-overlay" id="confirm-modal" style="z-index: 10000; align-items: center; justify-content: center;">
+    <div class="modal-content" style="max-width: 400px; text-align: center;">
+      <div class="modal-body" style="padding: 20px;">
+        <h3 id="confirm-modal-title" style="margin-bottom: 15px; color: var(--text-color);">Confirmar Ação</h3>
+        <p id="confirm-modal-msg" style="color: var(--text-muted); margin-bottom: 25px;">Tem certeza que deseja continuar?</p>
+        <div style="display: flex; justify-content: center; gap: 15px;">
+          <button class="btn-secondary" id="confirm-modal-cancel">Cancelar</button>
+          <button class="btn-danger" id="confirm-modal-ok">Excluir</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CUSTOM PROMPT MODAL -->
+  <div class="modal-overlay" id="prompt-modal" style="z-index: 10000; align-items: center; justify-content: center;">
+    <div class="modal-content" style="max-width: 400px;">
+      <div class="modal-body" style="padding: 20px;">
+        <h3 id="prompt-modal-title" style="margin-bottom: 15px; color: var(--text-color);">Inserir Dado</h3>
+        <label id="prompt-modal-label" style="display: block; margin-bottom: 8px; font-weight: 500;">Valor</label>
+        <input type="text" id="prompt-modal-input" class="form-control" style="width: 100%; box-sizing: border-box; margin-bottom: 25px;">
+        <div style="display: flex; justify-content: flex-end; gap: 15px;">
+          <button class="btn-secondary" id="prompt-modal-cancel">Cancelar</button>
+          <button class="btn-primary" id="prompt-modal-ok">Confirmar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CUSTOM EDIT ENTITY MODAL -->
+  <div class="modal-overlay" id="edit-entity-modal" style="z-index: 10000; align-items: center; justify-content: center;">
+    <div class="modal-content" style="max-width: 400px;">
+      <div class="modal-body" style="padding: 20px;">
+        <h3 id="edit-entity-modal-title" style="margin-bottom: 15px; color: var(--text-color);">Editar</h3>
+        <label style="display: block; margin-bottom: 8px; font-weight: 500;">Nome</label>
+        <input type="text" id="edit-entity-name" class="form-control" style="width: 100%; box-sizing: border-box; margin-bottom: 15px;">
+        <label style="display: block; margin-bottom: 8px; font-weight: 500;">E-mail de Acesso</label>
+        <input type="text" id="edit-entity-email" class="form-control" style="width: 100%; box-sizing: border-box; margin-bottom: 25px;">
+        <div style="display: flex; justify-content: flex-end; gap: 15px;">
+          <button class="btn-secondary" id="edit-entity-cancel">Cancelar</button>
+          <button class="btn-primary" id="edit-entity-ok">Salvar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Javascript File -->
+  <script src="app-v2.js?v=41"></script>
+</body>
+
+</html>

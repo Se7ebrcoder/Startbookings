@@ -1,0 +1,4 @@
+# StartBookings é um sistema interno de gestão (acesso por login).
+# Não há conteúdo público útil para buscadores — bloqueia indexação.
+User-agent: *
+Disallow: /

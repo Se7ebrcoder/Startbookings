@@ -1,0 +1,91 @@
+/* STARTBOOKINGS ADDITIONAL STYLES: COLOR PICKER & CHECKBOX */
+
+/* Color Picker Popover */
+.color-picker-popover {
+  position: absolute;
+  background: #2b2b36;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+  z-index: 10000;
+  width: 220px;
+}
+
+.color-picker-popover.hidden {
+  display: none;
+}
+
+.color-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+}
+
+.color-picker-swatch {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: transform 0.1s, border-color 0.1s;
+}
+
+.color-picker-swatch:hover {
+  transform: scale(1.15);
+  border-color: #fff;
+}
+
+/* Event Table Checkbox (ClickUp Style) */
+.event-checkbox {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--border-color);
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.event-checkbox:hover {
+  border-color: var(--primary-color);
+  background: rgba(255, 204, 0, 0.1);
+}
+
+.event-checkbox.checked {
+  background: #30d158;
+  border-color: #30d158;
+}
+
+.event-checkbox svg {
+  width: 12px;
+  height: 12px;
+  stroke: #fff;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+  opacity: 0;
+  transform: scale(0.5);
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.event-checkbox.checked svg {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Make list manager dots clickable */
+.list-manager-name .color-dot {
+  cursor: pointer;
+  transition: transform 0.2s;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.list-manager-name .color-dot:hover {
+  transform: scale(1.2);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+}

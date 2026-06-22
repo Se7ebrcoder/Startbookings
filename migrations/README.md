@@ -1,0 +1,61 @@
+# Migrations — StartBookings (Supabase / PostgreSQL)
+
+Scripts de banco **numerados e na ordem correta de aplicação**. Antes ficavam
+soltos na raiz do projeto; aqui estão organizados para que dê para **recriar o
+banco do zero** num projeto Supabase novo, com segurança.
+
+> ⚠️ **No banco que já está no ar, isto NÃO precisa ser re-rodado.** Todos estes
+> scripts já foram aplicados na produção atual. Esta pasta serve para
+> **reprodutibilidade** (montar um ambiente novo / staging) e como **histórico
+> versionado** do schema.
+
+## Como aplicar (projeto NOVO, do zero)
+
+Supabase → **SQL Editor** → New query → cole o conteúdo de cada arquivo e rode
+**na ordem numérica**. Todos são **idempotentes** (`create ... if not exists`,
+`create or replace`, `drop policy if exists`), então rodar de novo não quebra.
+
+| Ordem | Arquivo | O que cria | Depende de |
+|---|---|---|---|
+| 001 | `001_profiles_and_rls.sql` | `profiles`, `artist_emails`, funções `is_admin`/`current_user_email`/`current_artist_profile`, trigger `handle_new_user` (v1), **RLS de `events`** | — |
+| 002 | `002_add_session_token.sql` | coluna `session_token` em `profiles` (sessão única) | 001 |
+| 003 | `003_clients.sql` | `clients` + colunas `client_id`/`contract_status` em `events` | 001 |
+| 004 | `004_logistica.sql` | `logistics_emails`, `logistics`, `is_logistics`, `logistics_events()` (RPC), `handle_new_user` (v2: +Logística), CHECK de role → +`Logistica` | 001 |
+| 005 | `005_booker.sql` | `booker_emails`, `current_booker_name`, `handle_new_user` (v3: **final**, +Booker), RLS de `events` **final** (com `vendedor`), CHECK de role → +`Booker` | 001, 004 |
+| 006 | `006_kanban.sql` | `event_cards` (Kanban) | 001 |
+| 007 | `007_audit.sql` | `audit_logs` (triggers), `login_logs` (auditoria) | 001 |
+
+### Utilitário (rodar só quando precisar)
+
+| Arquivo | Para quê |
+|---|---|
+| `090_util_limpar_mocks.sql` | Limpa dados de exemplo/mocks antigos. **Não** é parte do schema; rode manualmente se um banco novo vier com dados de teste. |
+
+## Por que a ordem importa
+
+- O trigger **`handle_new_user`** é redefinido 3 vezes (001 → 004 → 005),
+  cada uma adicionando um papel. A versão **final e correta** é a do **005**,
+  então 004 precisa vir antes de 005.
+- O **CHECK de `role`** em `profiles` é expandido em etapas:
+  `001` (Admin/Artista) → `004` (+Logistica) → `005` (+Booker). Aplicar fora de
+  ordem faria um INSERT de papel novo violar o CHECK antigo.
+- O **RLS de `events`** é (re)definido em 001 e novamente em 005 (adiciona o
+  acesso do Booker pelo campo `vendedor`). A versão final é a do 005.
+- `005` consulta `logistics_emails` (criada em 004), `booker_emails` (criada
+  nele) e `artist_emails` (criada em 001).
+
+## `_obsoletos/` — NÃO rodar
+
+`supabase_rls.sql`, `supabase_rls_fix.sql`, `supabase_rls_hardening.sql` foram
+as primeiras versões do RLS. Estão **substituídas pelo `001_profiles_and_rls.sql`**
+(que resolveu o escalonamento de admin lendo papel de `profiles`, não de
+`user_metadata`). Ficam aqui só como histórico — **não aplique**.
+
+## Depois de aplicar (passos manuais do admin)
+
+1. **001/005:** preencher os mapas e-mail→nome — `artist_emails`,
+   `booker_emails`, `logistics_emails` — para os papéis resolverem no login.
+2. **007:** nada a fazer; os triggers passam a gravar sozinhos. Consultas de
+   exemplo estão no fim do próprio arquivo.
+3. Conferir no painel: **Confirm email** ligado, **Anonymous sign-ins** desligado,
+   `service_role` rotacionada.
