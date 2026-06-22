@@ -24,6 +24,15 @@ export function initLogisticsModule() {
   document.getElementById("close-logistics-create-btn").addEventListener("click", closeCreate);
   document.getElementById("cancel-logistics-create-btn").addEventListener("click", closeCreate);
 
+  // Checkbox "Pernoite na conexão" — mostra/esconde o bloco de hotel da conexão.
+  // Delegação no document (conexões são geradas dinamicamente). Antes vivia no boot.js.
+  document.addEventListener("change", (e) => {
+    const cb = e.target.closest && e.target.closest(".logi-conn-pernoite");
+    if (!cb) return;
+    const wrap = document.getElementById(cb.id.replace("-pernoite", "-hotel-wrap"));
+    if (wrap) wrap.style.display = cb.checked ? "block" : "none";
+  });
+
   if (openBtn) openBtn.addEventListener("click", () => {
     const today = logisticsToday();
     const evs = {};

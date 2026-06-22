@@ -132,6 +132,14 @@ export function initLogin() {
     }
   };
 
+  // Submit do cadastro (antes vivia no boot.js como onsubmit -> window.realizarCadastro).
+  if (registerForm) {
+    registerForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      window.realizarCadastro();
+    });
+  }
+
   // --- 2. LOGIN LOGIC ---
   loginForm.addEventListener("submit", async (e) => {
     e.preventDefault();

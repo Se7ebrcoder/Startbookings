@@ -86,6 +86,19 @@ export function initEventModal() {
     });
   }
 
+  // Remover artista do modal (precisa sobrar pelo menos 1). Delegação no document
+  // porque os blocos são gerados dinamicamente. Antes vivia no boot.js.
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest && e.target.closest(".remove-artist-btn");
+    if (!btn) return;
+    if (document.querySelectorAll(".artist-block").length > 1) {
+      const block = btn.closest(".artist-block");
+      if (block) block.remove();
+    } else {
+      showWarningToast("O evento precisa de pelo menos 1 artista.");
+    }
+  });
+
   if (openBtn) {
     openBtn.addEventListener("click", () => {
       form.reset();
