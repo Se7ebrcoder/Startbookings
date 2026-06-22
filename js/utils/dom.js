@@ -1,16 +1,5 @@
 // utils/dom.js — helpers de HTML/DOM e cores.
-
-// NOTA: VIBRANT_PALETTE fica aqui temporariamente; migra para core/config.js
-// na Task 5, quando dom.js passa a importá-la.
-const VIBRANT_PALETTE = [
-  "#af52de", // Purple
-  "#0a84ff", // Blue
-  "#5e5ce6", // Indigo
-  "#30d158", // Green
-  "#ff9f0a", // Orange
-  "#ff453a", // Red
-  "#32ade6"  // Cyan
-];
+import { VIBRANT_PALETTE } from '../core/config.js';
 
 export function escapeHtml(text) {
   // Coerção defensiva: nunca quebra com null/undefined/número (era causa de
