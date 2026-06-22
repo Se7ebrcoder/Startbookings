@@ -143,10 +143,20 @@
 - **Escopo:** sendo sistema **interno**, política pública/consentimento/termos **não** são bloqueantes — ficam na lista de pendências para **quando/se** abrir área pública. Hoje o obrigatório é o inventário (feito) e reduzir exposição de PII (feito).
 - Versão app-v2.js?v=41. **Pendente: deploy.**
 
+## 🧩 22. Modularização do backend (app-v2.js → js/) (2026-06-22)
+- **O quê:** o monólito `app-v2.js` (~4.760 linhas) foi quebrado numa pasta **`js/` de módulos ES nativos** (`type="module"`, sem bundler), organizada **em camadas**: `core/` (supabase, state, config), `utils/` (format, dom, auth-errors, domain — funções puras), `data/` (repositórios: única camada que fala com o Supabase), `ui/` (toast, modal, dropdown, nav), `features/` (1 pasta por tela: dashboard, timeline, events, clients, settings, kanban, finance, logistics), `auth/auth.js` e `main.js` (orquestração no `DOMContentLoaded`).
+- **Regra de ouro:** features nunca chamam `sbClient` direto — sempre via `data/`. Direção das dependências `features → data → core`; `utils`/`ui`/`config` são folhas. Sem ciclos proibidos (data/core/utils não importam de features).
+- **Sem mudança de comportamento:** funções movidas verbatim, com `export`/`import`. Ajustes pontuais: `checkArtistDateConflict(events, …)` recebe os eventos por parâmetro (era global); gráficos do dashboard via setters de `state.js` (bindings de import são read-only); `STATUS_LABELS` centralizado em `config.js`.
+- **Cutover (reversível):** `index.html` passou de `<script src="app-v2.js?v=41">` para `<script type="module" src="js/main.js?v=1">`. Rollback = reverter essa 1 linha.
+- **boot.js** encolheu para só o anti-flicker do login; a "cola" (troca de painéis, submit do cadastro, delegações de remover-artista e pernoite) migrou para os módulos.
+- **Testes:** `__tests__/app.test.js` e os `utils-*.test.js` passaram a importar de `js/` (Jest + babel-jest, ESM). Suíte: 34 verdes.
+- Feito na branch `refactor/modularizacao`. **Pendente: validar no navegador (deploy/preview) e merge.**
+
 ## 📂 Onde está cada coisa
 | Arquivo | O quê |
 |---|---|
-| `index.html`, `app-v2.js`, `style.css` | App (SPA vanilla JS) |
+| `index.html`, `js/` (ES modules em camadas), `style.css` | App (SPA vanilla JS) — `js/main.js` é o ponto de entrada |
+| `boot.js` | Anti-flicker do login (script clássico no `<head>`, antes da pintura) |
 | `vercel.json` | Cabeçalhos de segurança (CSP, HSTS etc.) no deploy do Vercel |
 | `migrations/00x_*.sql` | Scripts de banco **numerados e ordenados** (rodar no SQL Editor). Ver `migrations/README.md`. Versões antigas de RLS em `migrations/_obsoletos/` (não rodar). |
 | `docs/superpowers/specs/` e `plans/` | Desenhos e planos detalhados |

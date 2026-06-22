@@ -25,8 +25,23 @@ Object.defineProperty(window, 'localStorage', {
   value: localStorageMock
 });
 
-// Import functions from app-v2.js
-const app = require('../app-v2.js');
+// Funções extraídas para os módulos ES (js/). Antes vinham do monólito app-v2.js.
+import { formatCurrency, daysUntil, normalizeDate } from '../js/utils/format.js';
+import { hexToRgba, getRandomColor, escapeHtml } from '../js/utils/dom.js';
+import {
+  getPaymentStatus, deriveLogisticsStatus, legToFields, getLogisticsCost,
+  checklistProgress, reminderState, collectDueReminders
+} from '../js/utils/domain.js';
+import { friendlyAuthError } from '../js/utils/auth-errors.js';
+import { COST_LABELS, DEFAULT_CHECKLIST } from '../js/core/config.js';
+import { clearLocalPII } from '../js/core/state.js';
+
+const app = {
+  formatCurrency, daysUntil, normalizeDate, hexToRgba, getRandomColor, escapeHtml,
+  getPaymentStatus, deriveLogisticsStatus, legToFields, getLogisticsCost,
+  checklistProgress, reminderState, collectDueReminders, friendlyAuthError,
+  COST_LABELS, DEFAULT_CHECKLIST, clearLocalPII
+};
 
 describe('Testes de Funcionalidades Base (StartBookings)', () => {
   
