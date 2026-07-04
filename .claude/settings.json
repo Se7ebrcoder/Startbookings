@@ -45,7 +45,25 @@
       "Bash(ls *.sql)",
       "Bash(bash scripts/start-server.sh --project-dir \"c:/Users/raian/OneDrive/Documentos/Projeto site StartBookings\")",
       "Bash(git init *)",
-      "Bash(git config *)"
+      "Bash(git config *)",
+      "Bash(git commit -q -m ' *)",
+      "Bash(git branch *)",
+      "Bash(bash scripts/stop-server.sh \"c:/Users/raian/OneDrive/Documentos/Projeto site StartBookings/.superpowers/brainstorm/2156-1782113270\")",
+      "Bash(git checkout *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(npm i *)",
+      "Bash(node --check js/core/supabase.js)",
+      "Bash(npx babel *)",
+      "Bash(node -e \"require\\('@babel/core'\\).transformFileSync\\('js/core/state.js'\\); console.log\\('sintaxe OK \\(babel local\\)'\\)\")",
+      "Bash(node -e \"require\\('@babel/core'\\).transformFileSync\\('js/data/client.js'\\); require\\('@babel/core'\\).transformFileSync\\('js/data/events.repo.js'\\); console.log\\('sintaxe OK'\\)\")",
+      "Bash(node -e \"['clients.repo','logistics.repo','eventCards.repo','profiles.repo','emails.repo'].forEach\\(f=>require\\('@babel/core'\\).transformFileSync\\('js/data/'+f+'.js'\\)\\); console.log\\('sintaxe OK \\(5 repos\\)'\\)\")",
+      "Bash(node --check --input-type=module)",
+      "Bash(python -m http.server 8137)",
+      "Bash(curl -s -o /dev/null -w \"index.html -> HTTP %{http_code}\\\\n\" http://localhost:8137/index.html)",
+      "Bash(curl -s -o /dev/null -w \"js/main.js -> HTTP %{http_code}\\\\n\" http://localhost:8137/js/main.js)",
+      "Bash(curl -s -o /dev/null -w \"js/core/state.js -> HTTP %{http_code}\\\\n\" http://localhost:8137/js/core/state.js)",
+      "Bash(jobs -p)"
     ],
     "additionalDirectories": [
       "c:\\c\\Users\\raian\\OneDrive\\Documentos\\Projeto site StartBookings"

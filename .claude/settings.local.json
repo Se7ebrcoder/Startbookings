@@ -21,7 +21,8 @@
       "Bash(python -c \"import PIL; print\\('Pillow', PIL.__version__\\)\")",
       "Bash(python -c \"from PIL import Image; im=Image.open\\('logo.png'\\); print\\('size', im.size, 'mode', im.mode\\)\")",
       "Bash(python -c ' *)",
-      "WebFetch(domain:supabase.com)"
+      "WebFetch(domain:supabase.com)",
+      "Bash(git mv *)"
     ]
   }
 }

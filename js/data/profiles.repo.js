@@ -65,4 +65,21 @@ export async function startSessionTokenCheck(user) {
       if (!unavailable && token && token !== myToken) {
         clearInterval(sessionCheckInterval);
         await sbClient.auth.signOut();
- 
+        try { showWarningToast("Sua conta foi conectada em outro dispositivo.\nVocê foi desconectado deste."); } catch (e) { }
+        setTimeout(() => window.location.reload(), 2500);
+      }
+    } catch (e) { console.error("Session check error", e); }
+  }, 30000); // Verify every 30s
+}
+
+// Registra o login na tabela login_logs (auditoria). Best-effort: falha silenciosa.
+export async function logLogin(user) {
+  if (!sbClient || !user) return;
+  try {
+    await sbClient.from("login_logs").insert({
+      user_id: user.id,
+      email: (user.email || "").toLowerCase(),
+      user_agent: (typeof navigator !== "undefined" ? navigator.userAgent : "").slice(0, 300)
+    });
+  } catch (e) { dbg("logLogin falhou (ignorado):", e); }
+}
