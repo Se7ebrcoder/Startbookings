@@ -18,9 +18,9 @@ import { showDueReminders } from './features/kanban/reminders.js';
 import { initFinanceiro } from './features/finance/view.js';
 import { updateDashboard } from './features/dashboard/view.js';
 import { renderTimeline } from './features/timeline/view.js';
-import { fetchProfileData, startSessionTokenCheck } from './data/profiles.repo.js';
+import { fetchProfileData, roleLabelFromProfile, startSessionTokenCheck } from './data/profiles.repo.js';
 import { loadEventsFromSupabase } from './data/events.repo.js';
-import { loadArtistEmailsFromSupabase } from './data/emails.repo.js';
+import { loadArtistEmailsFromSupabase, loadBookerEmailsFromSupabase } from './data/emails.repo.js';
 import { loadClientsFromSupabase } from './data/clients.repo.js';
 import { loadLogisticsFromSupabase, loadLogisticsEvents } from './data/logistics.repo.js';
 import { loadEventCardsFromSupabase, ensureCardsForEvents } from './data/eventCards.repo.js';
@@ -53,33 +53,16 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (session) {
         dbg("Usuário já está logado via Supabase:", session.user.email);
         const user = session.user;
-        let roleFound = "";
-        const userEmail = (user.email || '').toLowerCase();
-        const ADMIN_EMAILS = ["startbookings@gmail.com", "cassiac.gouveia@gmail.com"];
-        const BOOKER_EMAILS = ["rayannecaldas@gmail.com", "mheloisasoaresth@gmail.com"];
+        // Papel/nome vêm SÓ da tabela profiles (fonte de verdade) — sem listas
+        // de e-mail hardcoded no bundle (achado #2 da auditoria).
         const profData = await fetchProfileData(user.id);
-
-        if (profData && profData.role === "Logistica") {
-          roleFound = `${user.user_metadata?.name || "Logística"} (Logística)`;
-        } else if ((profData && profData.role === "Booker") || BOOKER_EMAILS.includes(userEmail)) {
-          const bName = appState.bookerEmails && appState.bookerEmails[userEmail] ? appState.bookerEmails[userEmail] : (user.user_metadata?.name || "Booker");
-          roleFound = `${bName} (Booker)`;
-        } else if ((profData && profData.role === "Admin") || ADMIN_EMAILS.includes(userEmail)) {
-          roleFound = `${user.user_metadata?.name || "Admin"} (Admin)`;
-        } else if (user.user_metadata && user.user_metadata.role === "Admin") {
-          roleFound = `${user.user_metadata.name || "Admin"} (Admin)`;
-        } else {
-          // Check Supabase profiles artist_name first, then local mapping, then fallback
-          const mappedArtist = appState.artistEmails[userEmail];
-          const prof = (profData && profData.artist_name) ? profData.artist_name : (mappedArtist || (user.user_metadata ? (user.user_metadata.artistProfile || user.user_metadata.name) : "Artista"));
-          roleFound = `${prof} (Artista)`;
-        }
+        const roleFound = roleLabelFromProfile(profData, user);
         appState.currentRole = roleFound;
         try { sessionStorage.setItem("sb_current_role", roleFound); } catch (e) { }
         applyRoleUIChanges(roleFound);
 
-        // --- Session Token Check ---
-        startSessionTokenCheck(user, profData);
+        // --- Session Token Check (tabela user_sessions — migração 008) ---
+        startSessionTokenCheck(user);
 
         document.getElementById("login-overlay").classList.add("hidden");
 
@@ -87,6 +70,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         showAppLoading();
         await loadEventsFromSupabase();
         await loadArtistEmailsFromSupabase();
+        await loadBookerEmailsFromSupabase();
         await loadClientsFromSupabase();
         await loadLogisticsFromSupabase();
         await loadEventCardsFromSupabase();

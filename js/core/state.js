@@ -14,22 +14,12 @@ export const appState = {
   currentRole: null,
   users: null,
   tagColors: {},
-  artistEmails: {
-    "raianlameira@hotmail.com": "Se7e",
-    "contato.anotherreality@gmail.com": "Another Reality",
-    "parallelusmusic@gmail.com": "Parallelus",
-    "atomuz_@outlook.com": "Atomuz",
-    "contatoartisticope@gmail.com": "Bug System",
-    "giuseppebandini36@gmail.com": "Bandini"
-  },
-  adminEmails: {
-    "startbookings@gmail.com": "Ingrid (Master)",
-    "cassiac.gouveia@gmail.com": "Cassia"
-  },
-  bookerEmails: {
-    "rayannecaldas@gmail.com": "Rayanne",
-    "mheloisasoaresth@gmail.com": "Heloísa"
-  }
+  // Segurança/LGPD: SEM e-mails hardcoded no bundle (achado #2 da auditoria).
+  // Os mapas são preenchidos pós-login a partir do banco (RLS: só admin lê
+  // artist_emails/booker_emails). O login por nome usa a RPC resolve_login_email.
+  artistEmails: {},
+  adminEmails: {},
+  bookerEmails: {}
 };
 
 // Globais de ordenação/abas e instâncias de gráficos (reatribuídos via setters,
@@ -72,22 +62,11 @@ export function loadState() {
     appState.currentRole = sessionStorage.getItem("sb_current_role") || null;
     appState.users = JSON.parse(localStorage.getItem("sb_users")) || null;
     appState.tagColors = JSON.parse(localStorage.getItem("sb_tagColors")) || {};
-    appState.artistEmails = JSON.parse(localStorage.getItem("sb_artistEmails")) || {
-      "raianlameira@hotmail.com": "Se7e",
-      "contato.anotherreality@gmail.com": "Another Reality",
-      "parallelusmusic@gmail.com": "Parallelus",
-      "atomuz_@outlook.com": "Atomuz",
-      "contatoartisticope@gmail.com": "Bug System",
-      "giuseppebandini36@gmail.com": "Bandini",
-      "gabrielramos0420@gmail.com": "Invader Space",
-      "oliveira.lay12@gmail.com": "Shuri"
-    };
-    appState.adminEmails = JSON.parse(localStorage.getItem("sb_adminEmails")) || { "startbookings@gmail.com": "Ingrid (Master)", "cassiac.gouveia@gmail.com": "Cassia" };
-    if (!appState.adminEmails["cassiac.gouveia@gmail.com"]) appState.adminEmails["cassiac.gouveia@gmail.com"] = "Cassia";
-
-    appState.bookerEmails = JSON.parse(localStorage.getItem("sb_bookerEmails")) || { "rayannecaldas@gmail.com": "Rayanne", "mheloisasoaresth@gmail.com": "Heloísa" };
-    if (!appState.bookerEmails["rayannecaldas@gmail.com"]) appState.bookerEmails["rayannecaldas@gmail.com"] = "Rayanne";
-    if (!appState.bookerEmails["mheloisasoaresth@gmail.com"]) appState.bookerEmails["mheloisasoaresth@gmail.com"] = "Heloísa";
+    // Sem defaults hardcoded (PII) — o cache local só existe após um login
+    // que carregou os mapas do banco (e é apagado no logout via clearLocalPII).
+    appState.artistEmails = JSON.parse(localStorage.getItem("sb_artistEmails")) || {};
+    appState.adminEmails = JSON.parse(localStorage.getItem("sb_adminEmails")) || {};
+    appState.bookerEmails = JSON.parse(localStorage.getItem("sb_bookerEmails")) || {};
   } catch (err) {
     console.error("Storage error:", err);
   }

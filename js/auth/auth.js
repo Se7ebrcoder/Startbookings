@@ -3,11 +3,11 @@
 import { sbClient, captchaTokens, resetCaptcha } from '../core/supabase.js';
 import { appState, clearLocalPII } from '../core/state.js';
 import { friendlyAuthError } from '../utils/auth-errors.js';
-import { fetchProfileData, startSessionTokenCheck, logLogin } from '../data/profiles.repo.js';
+import { fetchProfileData, roleLabelFromProfile, startSessionTokenCheck, logLogin } from '../data/profiles.repo.js';
 import { applyRoleUIChanges } from '../ui/nav.js';
 import { showToast, showWarningToast, showAppLoading, hideAppLoading } from '../ui/toast.js';
 import { loadEventsFromSupabase } from '../data/events.repo.js';
-import { loadArtistEmailsFromSupabase } from '../data/emails.repo.js';
+import { loadArtistEmailsFromSupabase, loadBookerEmailsFromSupabase } from '../data/emails.repo.js';
 import { loadClientsFromSupabase } from '../data/clients.repo.js';
 import { loadLogisticsFromSupabase, loadLogisticsEvents } from '../data/logistics.repo.js';
 import { loadEventCardsFromSupabase, ensureCardsForEvents } from '../data/eventCards.repo.js';
@@ -73,22 +73,11 @@ export function initLogin() {
       return;
     }
 
-    // Admin emails list
-    const ADMIN_EMAILS = ["startbookings@gmail.com", "cassiac.gouveia@gmail.com"];
-    const BOOKER_EMAILS = ["rayannecaldas@gmail.com", "mheloisasoaresth@gmail.com"];
-
-    // Auto-assign role: Admin for admin email, Booker for booker email, Artista if email is in artistEmails, otherwise Artista genérico
-    let role = "Artista";
-    let artistProfile = "";
-    if (ADMIN_EMAILS.includes(email)) {
-      role = "Admin";
-    } else if (BOOKER_EMAILS.includes(email)) {
-      role = "Booker";
-    } else if (appState.artistEmails[email]) {
-      role = "Artista";
-      artistProfile = appState.artistEmails[email];
-    }
-
+    // Segurança: o PAPEL é decidido no servidor (trigger handle_new_user, que
+    // consulta artist_emails/booker_emails/logistics_emails). O front não envia
+    // mais role/artistProfile — user_metadata é editável pelo usuário e sempre
+    // foi ignorado pelo RLS; enviar só confundia. Também removemos as listas de
+    // e-mails hardcoded (exposição de PII no bundle — achado #2 da auditoria).
     const btn = registerForm.querySelector("button");
     btn.innerHTML = "Criando...";
     btn.disabled = true;
@@ -105,7 +94,7 @@ export function initLogin() {
         email,
         password,
         options: {
-          data: { name: artistProfile || name, role: role, artistProfile: artistProfile },
+          data: { name: name },
           captchaToken: captchaTokens.register
         }
       });
@@ -147,14 +136,13 @@ export function initLogin() {
     const password = document.getElementById("login-password").value;
 
     let loginEmail = email;
-    if (!loginEmail.includes("@")) {
-      const foundArtist = Object.keys(appState.artistEmails || {}).find(e => (appState.artistEmails[e] || "").toLowerCase() === loginEmail);
-      if (foundArtist) {
-        loginEmail = foundArtist;
-      } else {
-        const foundAdmin = Object.keys(appState.adminEmails || {}).find(e => (appState.adminEmails[e] || "").toLowerCase() === loginEmail);
-        if (foundAdmin) loginEmail = foundAdmin;
-      }
+    if (!loginEmail.includes("@") && sbClient) {
+      // Login por nome de artista/booker: resolvido NO SERVIDOR (RPC da
+      // migração 009) — o front não carrega mais mapas de e-mail (PII).
+      try {
+        const { data: resolved } = await sbClient.rpc('resolve_login_email', { identifier: loginEmail });
+        if (resolved) loginEmail = String(resolved).toLowerCase();
+      } catch (e) { /* segue com o valor digitado; o signIn falhará com erro amigável */ }
     }
 
     if (!captchaTokens.login) {
@@ -187,34 +175,18 @@ export function initLogin() {
         console.error("Login:", error); showToast(friendlyAuthError(error.message), "error");
       } else if (data.session) {
         const user = data.session.user;
-        const userEmail = (user.email || '').toLowerCase();
-        const ADMIN_EMAILS = ["startbookings@gmail.com", "cassiac.gouveia@gmail.com"];
-        const BOOKER_EMAILS = ["rayannecaldas@gmail.com", "mheloisasoaresth@gmail.com"];
-        let roleFound = "Artista";
+        // Papel/nome vêm SÓ da tabela profiles (fonte de verdade, definida pelo
+        // admin). Sem listas de e-mail hardcoded e sem user_metadata.role
+        // (editável pelo usuário — nunca confiar).
         const profData = await fetchProfileData(user.id);
-
-        if (profData && profData.role === "Logistica") {
-          roleFound = `${user.user_metadata?.name || "Logística"} (Logística)`;
-        } else if ((profData && profData.role === "Booker") || BOOKER_EMAILS.includes(userEmail)) {
-          const bName = appState.bookerEmails && appState.bookerEmails[userEmail] ? appState.bookerEmails[userEmail] : (user.user_metadata?.name || "Booker");
-          roleFound = `${bName} (Booker)`;
-        } else if ((profData && profData.role === "Admin") || ADMIN_EMAILS.includes(userEmail)) {
-          roleFound = `${user.user_metadata?.name || "Admin"} (Admin)`;
-        } else if (user.user_metadata && user.user_metadata.role === "Admin") {
-          roleFound = `${user.user_metadata.name || "Admin"} (Admin)`;
-        } else {
-          // Check Supabase profiles artist_name first, then local mapping, then fallback
-          const mappedArtist = appState.artistEmails[userEmail];
-          const prof = (profData && profData.artist_name) ? profData.artist_name : (mappedArtist || (user.user_metadata ? (user.user_metadata.artistProfile || user.user_metadata.name) : "Artista"));
-          roleFound = `${prof} (Artista)`;
-        }
+        const roleFound = roleLabelFromProfile(profData, user);
 
         appState.currentRole = roleFound;
         try { sessionStorage.setItem("sb_current_role", roleFound); } catch (e) { }
         applyRoleUIChanges(roleFound);
 
-        // --- Session Token Check ---
-        startSessionTokenCheck(user, profData);
+        // --- Session Token Check (tabela user_sessions — migração 008) ---
+        startSessionTokenCheck(user);
 
         // --- Auditoria: registra o login (best-effort, não bloqueia) ---
         logLogin(user);
@@ -225,6 +197,7 @@ export function initLogin() {
         showAppLoading();
         await loadEventsFromSupabase();
         await loadArtistEmailsFromSupabase();
+        await loadBookerEmailsFromSupabase();
         await loadClientsFromSupabase();
         await loadLogisticsFromSupabase();
         await loadEventCardsFromSupabase();
@@ -341,3 +314,4 @@ export function initLogin() {
     applyRoleUIChanges(appState.currentRole);
   }
 }
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             

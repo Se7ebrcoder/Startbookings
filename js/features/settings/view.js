@@ -47,19 +47,10 @@ export function initSettings() {
       if (name && !appState.artists.includes(name)) {
         appState.artists.push(name);
         appState.tagColors[name] = color;
-        let finalEmail = email;
-        if (!finalEmail) {
-          const defaultEmails = {
-            "raianlameira@hotmail.com": "Se7e",
-            "contato.anotherreality@gmail.com": "Another Reality",
-            "parallelusmusic@gmail.com": "Parallelus",
-            "atomuz_@outlook.com": "Atomuz",
-            "contatoartisticope@gmail.com": "Bug System",
-            "giuseppebandini36@gmail.com": "Bandini"
-          };
-          const foundKey = Object.keys(defaultEmails).find(k => defaultEmails[k] === name);
-          if (foundKey) finalEmail = foundKey;
-        }
+        // Segurança/LGPD: sem fallback de e-mails hardcoded (achado #2 da
+        // auditoria) — se o admin não informar e-mail, o artista fica sem
+        // mapeamento até ser editado (o banco é a única fonte de verdade).
+        const finalEmail = email;
 
         if (finalEmail) {
           if (!appState.artistEmails) appState.artistEmails = {};
@@ -138,13 +129,16 @@ export function updateConfigLists() {
   if (artistList) {
     artistList.innerHTML = "";
     appState.artists.forEach(artist => {
-      const color = appState.tagColors[artist] || "#ffcc00";
+      // Segurança: valida a cor (vem do localStorage — nunca interpolar sem validar)
+      const rawColor = appState.tagColors[artist] || "#ffcc00";
+      const color = /^#[0-9a-fA-F]{3,8}$/.test(rawColor) ? rawColor : "#ffcc00";
       let mappedEmail = "";
       let currentEmail = "";
       if (appState.artistEmails) {
         const found = Object.keys(appState.artistEmails).find(key => appState.artistEmails[key] === artist);
         if (found) {
-          mappedEmail = ` <span style="color:var(--text-muted); font-size:11px; margin-left:8px;">(${found})</span>`;
+          // Segurança: escapa o e-mail (vem do localStorage) antes de ir ao innerHTML
+          mappedEmail = ` <span style="color:var(--text-muted); font-size:11px; margin-left:8px;">(${escapeHtml(found)})</span>`;
           currentEmail = found;
         }
       }
@@ -279,7 +273,9 @@ export function updateConfigLists() {
   if (sellerList) {
     sellerList.innerHTML = "";
     appState.sellers.forEach(seller => {
-      const color = appState.tagColors[seller] || "#9a9a9f";
+      // Segurança: valida a cor (vem do localStorage — nunca interpolar sem validar)
+      const rawColor = appState.tagColors[seller] || "#9a9a9f";
+      const color = /^#[0-9a-fA-F]{3,8}$/.test(rawColor) ? rawColor : "#9a9a9f";
       let mappedEmail = "";
       let currentEmail = "";
 
@@ -287,7 +283,8 @@ export function updateConfigLists() {
       if (allTeamEmails) {
         const found = Object.keys(allTeamEmails).find(key => allTeamEmails[key] === seller);
         if (found) {
-          mappedEmail = ` <span style="color:var(--text-muted); font-size:11px; margin-left:8px;">(${found})</span>`;
+          // Segurança: escapa o e-mail (vem do localStorage) antes de ir ao innerHTML
+          mappedEmail = ` <span style="color:var(--text-muted); font-size:11px; margin-left:8px;">(${escapeHtml(found)})</span>`;
           currentEmail = found;
         }
       }
@@ -468,3 +465,4 @@ export function initColorPicker() {
     }
   });
 }
+                                                                                                                                                                                                                                                                                                                                   
