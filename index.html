@@ -16,7 +16,8 @@
   <link rel="stylesheet" href="assets/css/style.css?v=21">
   <link rel="stylesheet" href="assets/css/styles-login.css?v=3">
   <link rel="stylesheet" href="assets/css/styles-colorpicker.css?v=2">
-  <!-- Chart.js CDN (versão travada + verificação de integridade SRI) -->
+  <!-- Chart.js CDN (versão travada + SRI). ATENÇÃO: o CSP no vercel.json fixa a
+       URL EXATA deste arquivo — ao trocar a versão aqui, atualize também o CSP. -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"
           integrity="sha384-dug+JxfBvklEQdJ4AYuBBAIScUz0bVN73xpy273gcAwHjb3qI0fXmuYNaNfdyYJG"
           crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -24,7 +25,8 @@
   <!-- Boot: anti-flicker + lógica que antes era inline (CSP sem unsafe-inline) -->
   <script src="boot.js?v=1"></script>
 
-  <!-- Supabase CDN (versão travada 2.108.1 + verificação de integridade SRI) -->
+  <!-- Supabase CDN (versão travada 2.108.1 + SRI). ATENÇÃO: o CSP no vercel.json
+       fixa a URL EXATA deste arquivo — ao trocar a versão, atualize também o CSP. -->
   <script src="https://unpkg.com/@supabase/supabase-js@2.108.1/dist/umd/supabase.js"
           integrity="sha384-EjUdIVmzWliPzdzhxZ9ZoO0etXLKWuUPUftAGxP6qH6Lm4oLwoLaJR0Ba4pIDiDL"
           crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -100,7 +102,7 @@
           <div class="form-group">
             <label for="reg-password">Senha</label>
             <input type="password" id="reg-password" class="form-control" placeholder="Crie uma senha" required
-              minlength="6">
+              minlength="8">
           </div>
           <div id="captcha-register" class="captcha-box"></div>
           <button type="submit" class="btn-primary"
@@ -144,7 +146,7 @@
           <div class="form-group">
             <label for="reset-password">Nova Senha</label>
             <input type="password" id="reset-password" class="form-control" placeholder="Digite a nova senha" required
-              minlength="6">
+              minlength="8">
           </div>
           <button type="submit" class="btn-primary"
             style="width: 100%; justify-content: center; margin-top: 10px;">Salvar e Entrar</button>

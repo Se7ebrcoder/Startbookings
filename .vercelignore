@@ -16,3 +16,7 @@ docs
 .vscode
 .agent
 .claude
+.superpowers
+migrations
+package.json
+package-lock.json
