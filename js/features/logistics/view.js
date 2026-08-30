@@ -7,6 +7,7 @@ import { deriveLogisticsStatus } from '../../utils/domain.js';
 import { getArtistLogisticsStatus, getLogisticsRecord, saveLogistics } from '../../data/logistics.repo.js';
 import { LOGI_STATUS_LABELS } from '../../core/config.js';
 import { showToast } from '../../ui/toast.js';
+import { newId } from '../../utils/id.js';
 import { openLogisticsForm } from './form.js';
 import { openLogisticsViewModal } from './dossier.js';
 
@@ -97,7 +98,7 @@ export function renderLogisticsDashboard() {
 export function splitLogistics(id) {
   const rec = appState.logistics.find(r => r.id === id);
   if (!rec) return;
-  rec.groupId = "lgrp-" + Date.now() + Math.floor(Math.random() * 1000);
+  rec.groupId = newId("lgrp");
   saveLogistics(rec);
   renderLogisticsDashboard();
   showToast("Artista desmembrado do grupo.");

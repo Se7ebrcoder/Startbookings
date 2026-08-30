@@ -1,4 +1,7 @@
 // core/supabase.js — inicialização do cliente Supabase + hCaptcha + flags de debug.
+// As chaves públicas (URL, publishable key, sitekey) moram em core/env.js.
+
+import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, HCAPTCHA_SITEKEY as SITEKEY } from './env.js';
 
 // Debug logs informativos só quando ?debug=1 na URL ou localStorage.sb_debug="1".
 export const SB_DEBUG = (function () {
@@ -18,9 +21,9 @@ window.onunhandledrejection = function (event) {
 };
 
 // --- SUPABASE INITIALIZATION ---
-// Chave PUBLISHABLE (segura para o navegador quando o RLS está ativo).
-const supabaseUrl = 'https://jijjacpgbnubamawbscw.supabase.co';
-const supabaseKey = 'sb_publishable_VZAZOWTDO8ib_yxQ3muUWg_-Y1wek8_';
+// Chave PUBLISHABLE (segura para o navegador quando o RLS está ativo) — ver core/env.js.
+const supabaseUrl = SUPABASE_URL;
+const supabaseKey = SUPABASE_PUBLISHABLE_KEY;
 export let sbClient = null;
 try {
   if (window.supabase) {
@@ -37,7 +40,7 @@ try {
 }
 
 // --- hCAPTCHA (proteção contra bots no login/cadastro/recuperação) ---
-export const HCAPTCHA_SITEKEY = "b13a8788-f1ca-45a0-bfac-9cf82c429118";
+export const HCAPTCHA_SITEKEY = SITEKEY;
 export const captchaTokens = { login: null, register: null, forgot: null };
 export const captchaWidgets = {};
 
@@ -55,7 +58,9 @@ export function onHcaptchaLoad() {
         "error-callback": () => { captchaTokens[key] = null; }
       });
     } catch (e) {
-      console.error("Falha ao renderizar hCaptcha (" + key + "):", e);
+      // Argumentos separados (sem concatenar no 1º parâmetro): evita que um valor
+      // dinâmico seja interpretado como format string pelo console.
+      console.error("Falha ao renderizar hCaptcha:", key, e);
     }
   });
 }

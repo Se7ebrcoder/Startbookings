@@ -31,8 +31,16 @@
           integrity="sha384-EjUdIVmzWliPzdzhxZ9ZoO0etXLKWuUPUftAGxP6qH6Lm4oLwoLaJR0Ba4pIDiDL"
           crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
-  <!-- hCaptcha (proteção contra bots; render explícito p/ os 3 formulários) -->
-  <script src="https://js.hcaptcha.com/1/api.js?onload=onHcaptchaLoad&render=explicit" async defer></script>
+  <!-- hCaptcha (proteção contra bots; render explícito p/ os 3 formulários).
+       SEM integrity= de propósito: api.js é um loader mutável, versionado pelo
+       próprio hCaptcha (a URL /1/api.js sempre serve o build mais novo). Fixar um
+       hash SRI aqui derruba o captcha — e com ele o login — no primeiro update
+       deles. A mitigação usada é o CSP (script-src limitado a *.hcaptcha.com) +
+       referrerpolicy. Chart.js e supabase-js, esses sim com URL de versão imutável,
+       continuam com SRI. Não adicione crossorigin aqui: o hCaptcha não serve os
+       headers CORS necessários e o script deixaria de carregar. -->
+  <script src="https://js.hcaptcha.com/1/api.js?onload=onHcaptchaLoad&render=explicit"
+          referrerpolicy="no-referrer" async defer></script>
 </head>
 
 <body>

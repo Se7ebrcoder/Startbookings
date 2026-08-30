@@ -2,6 +2,7 @@
 
 import { appState, saveState } from '../../core/state.js';
 import { escapeHtml } from '../../utils/dom.js';
+import { newId } from '../../utils/id.js';
 import { checkArtistDateConflict } from '../../utils/domain.js';
 import { showToast, showWarningToast } from '../../ui/toast.js';
 import { saveClientToSupabase } from '../../data/clients.repo.js';
@@ -175,7 +176,7 @@ export function initEventModal() {
       const eventAmount = parseFloat(block.querySelector(".event-amount-input").value) || 0;
 
       const newEvent = {
-        id: "evt-" + Date.now() + Math.floor(Math.random() * 1000),
+        id: newId("evt"),
         groupId: groupId,
         event: eventName,
         date: eventDate,
@@ -228,10 +229,10 @@ export function initEventModal() {
       const name = document.getElementById("event-client-new-name").value.trim();
       const contact = document.getElementById("event-client-new-contact").value.trim();
       if (!name) { showWarningToast("Informe o nome do cliente."); return; }
-      const newId = "cli-" + Date.now() + Math.floor(Math.random() * 1000);
-      saveClientToSupabase({ id: newId, name, contact });
+      const clientId = newId("cli");
+      saveClientToSupabase({ id: clientId, name, contact });
       updateClientDropdown();
-      clientSelect.value = newId;
+      clientSelect.value = clientId;
       if (quickBox) quickBox.style.display = "none";
       document.getElementById("event-client-new-name").value = "";
       document.getElementById("event-client-new-contact").value = "";

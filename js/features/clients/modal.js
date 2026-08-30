@@ -3,6 +3,7 @@
 import { appState } from '../../core/state.js';
 import { saveClientToSupabase, deleteClientFromSupabase } from '../../data/clients.repo.js';
 import { showToast, showWarningToast } from '../../ui/toast.js';
+import { newId } from '../../utils/id.js';
 import { showConfirmModal } from '../../ui/modal.js';
 import { renderClientsView } from './view.js';
 import { updateClientDropdown } from '../events/modal.js';
@@ -70,7 +71,7 @@ export function initClientModule() {
     const name = document.getElementById("client-name-input").value.trim();
     const contact = document.getElementById("client-contact-input").value.trim();
     if (!name) { showWarningToast("Informe o nome do cliente."); return; }
-    const clientId = id || ("cli-" + Date.now() + Math.floor(Math.random() * 1000));
+    const clientId = id || newId("cli");
     saveClientToSupabase({ id: clientId, name, contact });
     close();
     renderClientsView();

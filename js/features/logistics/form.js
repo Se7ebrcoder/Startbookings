@@ -2,6 +2,7 @@
 
 import { appState } from '../../core/state.js';
 import { escapeHtml } from '../../utils/dom.js';
+import { newId } from '../../utils/id.js';
 import { formatDate, daysUntil } from '../../utils/format.js';
 import { saveLogistics, getLogisticsRecord } from '../../data/logistics.repo.js';
 import { LEG_MODES } from '../../core/config.js';
@@ -75,11 +76,11 @@ export function initLogisticsModule() {
     const ev = appState.logisticsEvents.find(e => e.groupId === logisticsFormCtx.eventKey);
     const eventDate = ev ? ev.eventDate : null;
     const status = finalize ? 'concluida' : 'andamento';
-    let groupId = logisticsFormCtx.existing ? logisticsFormCtx.existing.groupId : ("lgrp-" + Date.now());
+    let groupId = logisticsFormCtx.existing ? logisticsFormCtx.existing.groupId : newId("lgrp");
     logisticsFormCtx.artists.forEach(artist => {
       const prev = getLogisticsRecord(logisticsFormCtx.eventKey, artist);
       const rec = {
-        id: prev ? prev.id : ("log-" + Date.now() + Math.floor(Math.random() * 1000)),
+        id: prev ? prev.id : newId("log"),
         eventKey: logisticsFormCtx.eventKey, eventDate, artist,
         groupId: prev && prev.groupId ? prev.groupId : groupId,
         status, data
@@ -227,7 +228,12 @@ export function attachAddConn(scope) {
       const prefix = btn.getAttribute("data-prefix");
       const box = document.getElementById(`${prefix}-conexoes`);
       const i = box.querySelectorAll(".logi-conn").length;
-      box.insertAdjacentHTML("beforeend", connectionHTML(prefix, i, {}));
+      // <template> + appendChild em vez de insertAdjacentHTML: o markup daqui é
+      // estático (campos vazios), mas manter um único caminho de inserção evita
+      // que um dia alguém passe dado do usuário direto num sink de HTML.
+      const tpl = document.createElement("template");
+      tpl.innerHTML = connectionHTML(prefix, i, {});
+      box.appendChild(tpl.content);
     };
   });
 }

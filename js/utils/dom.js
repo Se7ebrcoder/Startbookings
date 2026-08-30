@@ -1,5 +1,6 @@
 // utils/dom.js — helpers de HTML/DOM e cores.
 import { VIBRANT_PALETTE } from '../core/config.js';
+import { randomPick } from './id.js';
 
 export function escapeHtml(text) {
   // Coerção defensiva: nunca quebra com null/undefined/número (era causa de
@@ -37,5 +38,5 @@ export function hexToRgba(hex, alpha) {
 }
 
 export function getRandomColor() {
-  return VIBRANT_PALETTE[Math.floor(Math.random() * VIBRANT_PALETTE.length)];
+  return randomPick(VIBRANT_PALETTE);
 }

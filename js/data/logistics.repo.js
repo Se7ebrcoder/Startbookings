@@ -4,6 +4,7 @@ import { fetchAllRows } from './client.js';
 import { appState } from '../core/state.js';
 import { setSyncStatus } from '../ui/toast.js';
 import { deriveLogisticsStatus } from '../utils/domain.js';
+import { newId } from '../utils/id.js';
 
 export async function loadLogisticsFromSupabase() {
   if (!sbClient) return;
@@ -71,7 +72,7 @@ export function getOrCreateLogistics(groupId, artist, eventDate) {
     return rec;
   }
   rec = {
-    id: "log-" + Date.now() + Math.floor(Math.random() * 1000),
+    id: newId("log"),
     eventKey: groupId || "",
     eventDate: eventDate || null,
     artist: artist,
