@@ -81,6 +81,17 @@ neste projeto. Foi ele que:
 **Regra de ouro dos dados:** se algo precisa **sobreviver a logout, deploy ou
 troca de navegador**, tem que estar **no Supabase** — nunca só no `localStorage`.
 
+### ↔️ Exceção: quando a migração REMOVE algo que o código antigo usa
+
+A ordem normal é *banco primeiro*. Mas se a migração **apaga** uma tabela, coluna
+ou função que a versão publicada ainda chama, a ordem se **inverte**:
+
+1. **Publique o frontend novo** (que não usa mais aquilo).
+2. **Depois** rode a migração que remove.
+
+Caso contrário o site que está no ar quebra na janela entre o SQL e o deploy.
+Cada migração desse tipo traz o aviso no próprio cabeçalho do `.sql`.
+
 ---
 
 ## 🔐 Regras de segurança (não quebrar)

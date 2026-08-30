@@ -29,6 +29,8 @@ Supabase → **SQL Editor** → New query → cole o conteúdo de cada arquivo e
 | 010 | `010_roster_e_settings.sql` | `roster` (elenco/equipe + cor) e `goals` (metas); backfill a partir de events/emails | 001, 005 |
 | 011 | `011_preenche_mapas_e_admin.sql` | garante os 8 artistas em `artist_emails` (faltavam 2) + bookers + roster; opcionalmente Cassia como admin real | 001, 005, 010 |
 | 012 | `012_cassia_admin.sql` | adiciona `cassiac.gouveia@gmail.com` à allowlist de admin em `is_admin()` e no trigger de signup (funciona tendo conta ou não) | 001, 005 |
+| 013 | `013_corrige_rls_string_vazia.sql` | **correção crítica**: RLS de `events` casava `'' = ''`; restringe também `goals` e `roster` | 001, 005, 010 |
+| 014 | `014_remove_resolve_login_email.sql` | remove a RPC de login por nome (expunha e-mails a anônimos). **Rodar DEPOIS do deploy do frontend** | 009 |
 
 > 🔴 **A 010 e a 011 são NOVAS e PRECISAM ser rodadas no banco em produção**
 > (as demais já estão aplicadas). A 011 deve rodar ANTES de publicar a versão

@@ -149,14 +149,15 @@ export function initLogin() {
     const email = document.getElementById("login-username").value.trim().toLowerCase();
     const password = document.getElementById("login-password").value;
 
-    let loginEmail = email;
-    if (!loginEmail.includes("@") && sbClient) {
-      // Login por nome de artista/booker: resolvido NO SERVIDOR (RPC da
-      // migração 009) — o front não carrega mais mapas de e-mail (PII).
-      try {
-        const { data: resolved } = await sbClient.rpc('resolve_login_email', { identifier: loginEmail });
-        if (resolved) loginEmail = String(resolved).toLowerCase();
-      } catch (e) { /* segue com o valor digitado; o signIn falhará com erro amigável */ }
+    // Login é SEMPRE por e-mail (achado SB-02 da auditoria de 29/08/2026).
+    // Antes aceitava o nome artístico e resolvia via RPC resolve_login_email,
+    // que precisava ser pública (roda antes do login) — qualquer pessoa
+    // convertia nome artístico (público) em e-mail pessoal. A RPC foi removida
+    // na migração 014; aqui só orientamos quem digitar o nome por engano.
+    const loginEmail = email;
+    if (!loginEmail.includes("@")) {
+      showWarningToast("Entre com seu e-mail completo (não o nome do projeto).");
+      return;
     }
 
     if (!captchaTokens.login) {

@@ -16,7 +16,8 @@ export const appState = {
   tagColors: {},
   // Segurança/LGPD: SEM e-mails hardcoded no bundle (achado #2 da auditoria).
   // Os mapas são preenchidos pós-login a partir do banco (RLS: só admin lê
-  // artist_emails/booker_emails). O login por nome usa a RPC resolve_login_email.
+  // artist_emails/booker_emails). O login é sempre por e-mail (a RPC de login
+  // por nome foi removida na migração 014 — expunha e-mails a anônimos).
   artistEmails: {},
   adminEmails: {},
   bookerEmails: {}
