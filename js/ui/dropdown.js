@@ -9,6 +9,7 @@ import { updateDropdownOptions, renderEventTable } from '../features/events/tabl
 import { updateConfigLists } from '../features/settings/view.js';
 import { updateDashboard } from '../features/dashboard/view.js';
 import { renderTimeline } from '../features/timeline/view.js';
+import { upsertRosterEntry } from '../data/roster.repo.js';
 
 export function openCustomDropdown(targetBtn, eventId, field) {
   // Check if targetBtn already has a popover open
@@ -127,6 +128,9 @@ export function openCustomDropdown(targetBtn, eventId, field) {
 
         if (field !== "status") {
           appState.tagColors[newOpt] = getRandomColor();
+          // persiste elenco/equipe no banco (antes só localStorage)
+          if (field === "artist") upsertRosterEntry(newOpt, 'artist', appState.tagColors[newOpt]);
+          else if (field === "vendedor") upsertRosterEntry(newOpt, 'seller', appState.tagColors[newOpt]);
           saveState();
         }
 

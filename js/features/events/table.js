@@ -3,6 +3,8 @@
 
 import { appState, saveState, currentSortColumn, currentSortOrder, setSortColumn, setSortOrder, setActiveEventGroup } from '../../core/state.js';
 import { escapeHtml, emptyStateHtml, hexToRgba, getRandomColor } from '../../utils/dom.js';
+import { newId } from '../../utils/id.js';
+import { upsertRosterEntry } from '../../data/roster.repo.js';
 import { formatCurrency, formatDate, normalizeDate } from '../../utils/format.js';
 import { getLogisticsCost, checkArtistDateConflict } from '../../utils/domain.js';
 import { STATUS_LABELS, CONTRACT_LABELS, LOGI_STATUS_LABELS } from '../../core/config.js';
@@ -39,6 +41,7 @@ export function initTableFilters() {
           if (!appState.artists.includes(newName)) {
             appState.artists.push(newName);
             appState.tagColors[newName] = getRandomColor();
+            upsertRosterEntry(newName, 'artist', appState.tagColors[newName]); // persiste no banco
             saveState();
             updateDropdownOptions();
             updateConfigLists();
@@ -67,6 +70,7 @@ export function initTableFilters() {
             if (!appState.sellers.includes(newName)) {
               appState.sellers.push(newName);
               appState.tagColors[newName] = getRandomColor();
+              upsertRosterEntry(newName, 'seller', appState.tagColors[newName]); // persiste no banco
               saveState();
               updateDropdownOptions();
               updateConfigLists();
@@ -479,7 +483,7 @@ export function renderEventTable() {
       const key = btn.getAttribute("data-key");
       const groupInfo = groups[key];
       const newEvent = {
-        id: "evt-" + Date.now() + Math.floor(Math.random() * 1000),
+        id: newId("evt"),
         groupId: groupInfo.items[0] ? groupInfo.items[0].groupId : ("grp-" + Date.now()),
         event: groupInfo.event,
         date: groupInfo.date,
@@ -738,7 +742,7 @@ export function duplicateEventForNewArtist(eventId) {
     eventObj.groupId = groupId; // Garante que o original tem o grupo
 
     const newEvent = {
-      id: "evt-" + Date.now() + Math.floor(Math.random() * 1000),
+      id: newId("evt"),
       groupId: groupId,
       event: eventObj.event,
       date: eventObj.date,

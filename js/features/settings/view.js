@@ -3,6 +3,7 @@
 import { appState, saveState } from '../../core/state.js';
 import { escapeHtml, getRandomColor } from '../../utils/dom.js';
 import { sbClient } from '../../core/supabase.js';
+import { upsertRosterEntry, deleteRosterEntry, renameRosterEntry, updateRosterColor, upsertGoal } from '../../data/roster.repo.js';
 import { showToast, showWarningToast } from '../../ui/toast.js';
 import { showEditEntityModal } from '../../ui/modal.js';
 import { updateDropdownOptions, renderEventTable } from '../events/table.js';
@@ -25,6 +26,7 @@ export function initSettings() {
     const currentName = appState.currentRole ? appState.currentRole.split(" (")[0] : "Admin";
     if (!isNaN(val) && val > 0) {
       appState.goals[currentName] = val;
+      upsertGoal(currentName, val); // persiste no banco (antes só localStorage)
       saveState();
       updateDashboard();
       showToast("Meta anual atualizada com sucesso!");
@@ -47,6 +49,7 @@ export function initSettings() {
       if (name && !appState.artists.includes(name)) {
         appState.artists.push(name);
         appState.tagColors[name] = color;
+        upsertRosterEntry(name, 'artist', color); // persiste no banco
         // Segurança/LGPD: sem fallback de e-mails hardcoded (achado #2 da
         // auditoria) — se o admin não informar e-mail, o artista fica sem
         // mapeamento até ser editado (o banco é a única fonte de verdade).
@@ -89,6 +92,7 @@ export function initSettings() {
       if (name && !appState.sellers.includes(name)) {
         appState.sellers.push(name);
         appState.tagColors[name] = color;
+        upsertRosterEntry(name, 'seller', color); // persiste no banco
         if (email) {
           if (!appState.adminEmails) appState.adminEmails = {};
           appState.adminEmails[email] = name;
@@ -203,6 +207,9 @@ export function updateConfigLists() {
               if (ev.artist === oldName) ev.artist = nameTrimmed;
             });
 
+            // Renomeia no elenco persistido (roster)
+            renameRosterEntry(oldName, nameTrimmed, 'artist', appState.tagColors[nameTrimmed]);
+
             // Supabase sync
             if (appState.currentRole && typeof sbClient !== "undefined" && sbClient) {
               sbClient.from('events').update({ artist: nameTrimmed }).eq('artist', oldName).then(({ error }) => {
@@ -247,6 +254,7 @@ export function updateConfigLists() {
         if (confirm(`Excluir o artista ${name} e todos os seus shows?`)) {
           appState.artists = appState.artists.filter(a => a !== name);
           appState.events = appState.events.filter(e => e.artist !== name);
+          deleteRosterEntry(name, 'artist'); // remove do elenco persistido
           // Delete from email mapping
           if (appState.artistEmails) {
             Object.keys(appState.artistEmails).forEach(email => {
@@ -358,6 +366,9 @@ export function updateConfigLists() {
               if (ev.vendedor === oldName) ev.vendedor = nameTrimmed;
             });
 
+            // Renomeia na equipe persistida (roster)
+            renameRosterEntry(oldName, nameTrimmed, 'seller', appState.tagColors[nameTrimmed]);
+
             // Supabase sync
             if (appState.currentRole && typeof sbClient !== "undefined" && sbClient) {
               sbClient.from('events').update({ vendedor: nameTrimmed }).eq('vendedor', oldName).then(({ error }) => {
@@ -402,6 +413,7 @@ export function updateConfigLists() {
         const name = btn.getAttribute("data-name");
         if (confirm(`Excluir o gerente/vendedor ${name}? Isso removerá a atribuição de vendas desse gerente nas metas.`)) {
           appState.sellers = appState.sellers.filter(s => s !== name);
+          deleteRosterEntry(name, 'seller'); // remove da equipe persistida
           // Delete from email mapping
           if (appState.adminEmails) {
             Object.keys(appState.adminEmails).forEach(email => {
@@ -425,6 +437,7 @@ export function updateConfigLists() {
     inp.addEventListener("change", () => {
       const name = inp.getAttribute("data-name");
       appState.tagColors[name] = inp.value;
+      updateRosterColor(name, inp.value); // persiste a cor no banco
       saveState();
       updateConfigLists();
       renderEventTable();
@@ -448,6 +461,7 @@ export function initColorPicker() {
     swatch.addEventListener("click", () => {
       if (currentEditTag) {
         appState.tagColors[currentEditTag] = color;
+        updateRosterColor(currentEditTag, color); // persiste a cor no banco
         saveState();
         popover.classList.add("hidden");
         updateConfigLists();

@@ -3,12 +3,14 @@
 import { sbClient, captchaTokens, resetCaptcha } from '../core/supabase.js';
 import { appState, clearLocalPII } from '../core/state.js';
 import { friendlyAuthError } from '../utils/auth-errors.js';
+import { checkLoginThrottle, recordLoginFailure, recordLoginSuccess } from './login-throttle.js';
 import { fetchProfileData, roleLabelFromProfile, startSessionTokenCheck, logLogin } from '../data/profiles.repo.js';
 import { applyRoleUIChanges } from '../ui/nav.js';
 import { showToast, showWarningToast, showAppLoading, hideAppLoading } from '../ui/toast.js';
 import { loadEventsFromSupabase } from '../data/events.repo.js';
 import { loadArtistEmailsFromSupabase, loadBookerEmailsFromSupabase } from '../data/emails.repo.js';
 import { loadClientsFromSupabase } from '../data/clients.repo.js';
+import { loadRosterFromSupabase, backfillRosterIfEmpty } from '../data/roster.repo.js';
 import { loadLogisticsFromSupabase, loadLogisticsEvents } from '../data/logistics.repo.js';
 import { loadEventCardsFromSupabase, ensureCardsForEvents } from '../data/eventCards.repo.js';
 import { updateDashboard } from '../features/dashboard/view.js';
@@ -132,6 +134,18 @@ export function initLogin() {
   // --- 2. LOGIN LOGIC ---
   loginForm.addEventListener("submit", async (e) => {
     e.preventDefault();
+
+    // Defesa em profundidade: freia tentativas repetidas nesta aba (a proteção
+    // principal é o hCaptcha obrigatório + rate limit do Supabase). Ver login-throttle.js.
+    const throttle = checkLoginThrottle();
+    if (throttle.blocked) {
+      const mins = Math.floor(throttle.waitSeconds / 60);
+      const secs = throttle.waitSeconds % 60;
+      const tempo = mins > 0 ? `${mins}min ${secs}s` : `${secs}s`;
+      showWarningToast(`Muitas tentativas. Aguarde ${tempo} antes de tentar novamente.`);
+      return;
+    }
+
     const email = document.getElementById("login-username").value.trim().toLowerCase();
     const password = document.getElementById("login-password").value;
 
@@ -172,8 +186,10 @@ export function initLogin() {
       btn.disabled = false;
 
       if (error) {
+        recordLoginFailure();
         console.error("Login:", error); showToast(friendlyAuthError(error.message), "error");
       } else if (data.session) {
+        recordLoginSuccess();
         const user = data.session.user;
         // Papel/nome vêm SÓ da tabela profiles (fonte de verdade, definida pelo
         // admin). Sem listas de e-mail hardcoded e sem user_metadata.role
@@ -202,6 +218,12 @@ export function initLogin() {
         await loadLogisticsFromSupabase();
         await loadEventCardsFromSupabase();
         await loadLogisticsEvents();
+        // Elenco/equipe/cores/metas: banco é a fonte de verdade (antes viviam só
+        // no localStorage e sumiam a cada logout/deploy). Depois de carregar, o
+        // backfill sobe uma única vez os dados legados que ainda estejam no
+        // navegador do admin (no-op se o banco já tiver dados ou se não for admin).
+        await loadRosterFromSupabase();
+        await backfillRosterIfEmpty();
 
         updateDashboard();
         renderEventTable();

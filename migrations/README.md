@@ -24,6 +24,15 @@ Supabase → **SQL Editor** → New query → cole o conteúdo de cada arquivo e
 | 005 | `005_booker.sql` | `booker_emails`, `current_booker_name`, `handle_new_user` (v3: **final**, +Booker), RLS de `events` **final** (com `vendedor`), CHECK de role → +`Booker` | 001, 004 |
 | 006 | `006_kanban.sql` | `event_cards` (Kanban) | 001 |
 | 007 | `007_audit.sql` | `audit_logs` (triggers), `login_logs` (auditoria) | 001 |
+| 008 | `008_sessao_unica_e_hardening.sql` | `user_sessions` (sessão única) + hardening | 001 |
+| 009 | `009_resolve_login.sql` | RPC `resolve_login_email` (login por nome sem expor PII) | 001, 005 |
+| 010 | `010_roster_e_settings.sql` | `roster` (elenco/equipe + cor) e `goals` (metas); backfill a partir de events/emails | 001, 005 |
+
+> 🔴 **A 010 é NOVA e PRECISA ser rodada no banco em produção** (as demais já
+> estão aplicadas). Ela conserta a perda de artistas/bookers/cores/metas, que
+> antes viviam só no `localStorage` do navegador. Sem rodar a 010, o front tenta
+> gravar em `roster`/`goals` e falha silenciosamente (tabelas inexistentes),
+> continuando a perder os dados.
 
 ### Utilitário (rodar só quando precisar)
 
@@ -59,3 +68,8 @@ as primeiras versões do RLS. Estão **substituídas pelo `001_profiles_and_rls.
    exemplo estão no fim do próprio arquivo.
 3. Conferir no painel: **Confirm email** ligado, **Anonymous sign-ins** desligado,
    `service_role` rotacionada.
+4. **010:** nada a preencher. No primeiro login do admin após rodar, o front faz
+   um **backfill automático** (uma vez por navegador) subindo para `roster`/`goals`
+   os artistas/vendedores/cores/metas que ainda estejam no `localStorage` do admin.
+   A própria migração também já semeia `roster` a partir de `events`,
+   `artist_emails` e `booker_emails`.
