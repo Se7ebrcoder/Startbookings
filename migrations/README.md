@@ -27,9 +27,12 @@ Supabase → **SQL Editor** → New query → cole o conteúdo de cada arquivo e
 | 008 | `008_sessao_unica_e_hardening.sql` | `user_sessions` (sessão única) + hardening | 001 |
 | 009 | `009_resolve_login.sql` | RPC `resolve_login_email` (login por nome sem expor PII) | 001, 005 |
 | 010 | `010_roster_e_settings.sql` | `roster` (elenco/equipe + cor) e `goals` (metas); backfill a partir de events/emails | 001, 005 |
+| 011 | `011_preenche_mapas_e_admin.sql` | garante os 8 artistas em `artist_emails` (faltavam 2) + bookers + roster; opcionalmente Cassia como admin real | 001, 005, 010 |
 
-> 🔴 **A 010 é NOVA e PRECISA ser rodada no banco em produção** (as demais já
-> estão aplicadas). Ela conserta a perda de artistas/bookers/cores/metas, que
+> 🔴 **A 010 e a 011 são NOVAS e PRECISAM ser rodadas no banco em produção**
+> (as demais já estão aplicadas). A 011 deve rodar ANTES de publicar a versão
+> segura do frontend — senão artistas cujo e-mail não esteja em `artist_emails`
+> perdem o login por nome (a versão antiga tinha esses mapas hardcoded). Ela conserta a perda de artistas/bookers/cores/metas, que
 > antes viviam só no `localStorage` do navegador. Sem rodar a 010, o front tenta
 > gravar em `roster`/`goals` e falha silenciosamente (tabelas inexistentes),
 > continuando a perder os dados.
