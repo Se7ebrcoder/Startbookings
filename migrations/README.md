@@ -28,6 +28,7 @@ Supabase → **SQL Editor** → New query → cole o conteúdo de cada arquivo e
 | 009 | `009_resolve_login.sql` | RPC `resolve_login_email` (login por nome sem expor PII) | 001, 005 |
 | 010 | `010_roster_e_settings.sql` | `roster` (elenco/equipe + cor) e `goals` (metas); backfill a partir de events/emails | 001, 005 |
 | 011 | `011_preenche_mapas_e_admin.sql` | garante os 8 artistas em `artist_emails` (faltavam 2) + bookers + roster; opcionalmente Cassia como admin real | 001, 005, 010 |
+| 012 | `012_cassia_admin.sql` | adiciona `cassiac.gouveia@gmail.com` à allowlist de admin em `is_admin()` e no trigger de signup (funciona tendo conta ou não) | 001, 005 |
 
 > 🔴 **A 010 e a 011 são NOVAS e PRECISAM ser rodadas no banco em produção**
 > (as demais já estão aplicadas). A 011 deve rodar ANTES de publicar a versão
