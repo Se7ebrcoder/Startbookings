@@ -77,9 +77,64 @@ Hoje atendidos **manualmente pelo admin** via Supabase (SQL Editor):
 
 ## 7. Retenção
 
-Atualmente os dados são mantidos **por tempo indeterminado**. 
-➡️ **Pendência:** definir uma política de retenção (ex.: arquivar/anonimizar
-eventos com mais de X anos) e documentar aqui.
+⚠️ **Hoje: tempo indeterminado — NÃO CONFORME** (Art. 15/16 da LGPD).
+
+**Tabela de temporalidade definida no parecer de 30/08/2026 (a implementar):**
+
+| Categoria | Prazo | Fundamento |
+|---|---|---|
+| Logística de viagem (hotel, voo, motorista, localizador) | **90 dias** após o show | Finalidade exaurida; risco alto ao titular |
+| Shows e financeiro | **5 anos** após fim do contrato | Prescrição civil (CC 206 §5º I) + fiscal |
+| `login_logs` | **6 meses** | Marco Civil da Internet, Art. 15 |
+| `audit_logs` | **24 meses** | Legítimo interesse / prevenção a fraude |
+| Contas inativas | Revisão anual | Necessidade |
+
+➡️ Implementar via `pg_cron`. **Não existe nenhuma rotina de expurgo hoje** (verificado
+nas 14 migrações).
+
+## 7b. Achados do parecer LGPD de 30/08/2026
+
+Parecer completo: artifact publicado em 30/08/2026 (ver histórico do projeto).
+
+**🔴 Bloqueantes**
+- **P-01 — `audit_logs` duplica todo dado pessoal para sempre.** Guarda `old_data`/`new_data`
+  como `to_jsonb(OLD/NEW)` — a linha inteira. Cachê, endereço de hotel, motorista e
+  localizador ficam em cópia permanente, o que **torna o direito de eliminação inexequível**
+  (Art. 18, VI). Corrigir: gravar só campos alterados + redigir campos de risco + expurgo.
+- **P-02 — Retenção indeterminada** (ver tabela acima).
+- **P-06 — Transferência internacional sem instrumento.** Verificar região do Supabase
+  (se `sa-east-1`, o dado fica no Brasil) e aceitar/solicitar os DPAs de Supabase e Vercel.
+  Cláusulas-padrão: Resolução CD/ANPD nº 19/2024.
+
+**🟠 Relevantes**
+- **P-03 — Localizador (PNR) é credencial, não dado descritivo.** Permite alterar/cancelar a
+  reserva no site da cia aérea. Mascarar ou eliminar após o embarque.
+- **P-04 — Roteiro = localização de pessoa pública.** Risco físico (perseguição/furto) num
+  vazamento. Justifica RIPD (Art. 38).
+- **P-07 — Falta arcabouço documental:** registro de operações (Art. 37), plano de
+  incidentes (Art. 48, prazo de **3 dias úteis** à ANPD — Res. CD/ANPD nº 15/2024), LIA e RIPD.
+- **P-08 — Autocadastro aberto** contradiz a natureza interna declarada.
+
+**🟡 Recomendações**
+- **P-05 — Dados de terceiros** (motorista, recepção) que nunca usam o sistema: base é
+  legítimo interesse, exige LIA e aviso via locadora/transfer.
+- **P-09 — Reforços:** MFA no Admin, criptografia em coluna do localizador, teste de
+  restauração de backup, revisão trimestral de acessos, e gravar `login_logs` por trigger
+  (hoje o próprio usuário consegue inserir a própria linha).
+
+**✅ Correções de inventário (o texto anterior estava impreciso)**
+- `login_logs` **NÃO armazena IP** — só `email`, `logged_at` e `user_agent`. O IP existe
+  apenas nos logs de infraestrutura de Supabase/Vercel/hCaptcha.
+- hCaptcha **não coleta dado biométrico**. Movimento de mouse é dado pessoal comum, não
+  biometria (Art. 5º, II) — se fosse, seria dado sensível e mudaria todo o regime.
+- **Banner de cookies não é necessário:** só há `localStorage`/token estritamente
+  necessários e nenhum rastreador de terceiros. Basta informar na Política.
+
+**Bases legais (resumo):** equipe/artistas/clientes/logística = **execução de contrato**
+(Art. 7º, V); financeiro = contrato + **obrigação legal** (Art. 7º, II); logs, sessão e
+hCaptcha = **legítimo interesse** (Art. 7º, IX); artistas menores = **Art. 14** +
+representação legal. **Consentimento quase nunca é a base correta aqui** — seria revogável
+e travaria a operação.
 
 ## 8. Pendências de conformidade (priorizar SE abrir área pública)
 
@@ -90,5 +145,7 @@ eventos com mais de X anos) e documentar aqui.
 - [ ] Definir política de **retenção** (item 7).
 - [ ] Revisão jurídica deste documento.
 
-> Enquanto o sistema for **100% interno**, os itens acima não são bloqueantes,
-> mas este inventário (seções 1–7) já deve ser mantido atualizado.
+> ⚠️ **REVISADO EM 30/08/2026:** a premissa de que "enquanto interno, não é bloqueante"
+> está **incorreta**. A transparência (Art. 6º VI e Art. 9º) e a retenção (Art. 15/16)
+> valem mesmo em sistema interno — artistas, equipe e clientes são titulares e têm
+> direito de saber o que é tratado. Ver seção 7b para o plano priorizado.
