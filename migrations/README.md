@@ -31,14 +31,16 @@ Supabase → **SQL Editor** → New query → cole o conteúdo de cada arquivo e
 | 012 | `012_cassia_admin.sql` | adiciona `cassiac.gouveia@gmail.com` à allowlist de admin em `is_admin()` e no trigger de signup (funciona tendo conta ou não) | 001, 005 |
 | 013 | `013_corrige_rls_string_vazia.sql` | **correção crítica**: RLS de `events` casava `'' = ''`; restringe também `goals` e `roster` | 001, 005, 010 |
 | 014 | `014_remove_resolve_login_email.sql` | remove a RPC de login por nome (expunha e-mails a anônimos). **Rodar DEPOIS do deploy do frontend** | 009 |
+| 015 | `015_lgpd_minimizacao_e_retencao.sql` | audit_logs passa a gravar só o delta e redige campos sensíveis; expurgo de audit (24m) e login (6m); login_logs gravado por RPC | 007 |
+| 016 | `016_lgpd_retencao_logistica.sql` | mascara o localizador em D+2 e anonimiza o roteiro em D+90, preservando os valores do Financeiro | 004 |
+| 017 | `017_lgpd_direitos_do_titular.sql` | `exportar_dados_titular()`, `anonimizar_titular()` e tabela de registro de solicitações (Art. 18) | 001, 004, 005, 010 |
 
-> 🔴 **A 010 e a 011 são NOVAS e PRECISAM ser rodadas no banco em produção**
-> (as demais já estão aplicadas). A 011 deve rodar ANTES de publicar a versão
-> segura do frontend — senão artistas cujo e-mail não esteja em `artist_emails`
-> perdem o login por nome (a versão antiga tinha esses mapas hardcoded). Ela conserta a perda de artistas/bookers/cores/metas, que
-> antes viviam só no `localStorage` do navegador. Sem rodar a 010, o front tenta
-> gravar em `roster`/`goals` e falha silenciosamente (tabelas inexistentes),
-> continuando a perder os dados.
+> 🟢 **015 a 017 são de conformidade LGPD** (parecer de 30/08/2026). Nenhuma delas apaga
+> dados ao ser executada: criam funções e agendamentos. A 015 **exige o deploy do frontend
+> junto**, porque muda a gravação de `login_logs` para RPC.
+
+> ✅ **Status em 30/08/2026:** as migrações 001–014 já estão **aplicadas em produção**.
+> As **015, 016 e 017 (LGPD) ainda NÃO foram rodadas** — ver plano abaixo.
 
 ### Utilitário (rodar só quando precisar)
 

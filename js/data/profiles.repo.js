@@ -76,10 +76,13 @@ export async function startSessionTokenCheck(user) {
 export async function logLogin(user) {
   if (!sbClient || !user) return;
   try {
-    await sbClient.from("login_logs").insert({
-      user_id: user.id,
-      email: (user.email || "").toLowerCase(),
-      user_agent: (typeof navigator !== "undefined" ? navigator.userAgent : "").slice(0, 300)
+    // Gravado por RPC SECURITY DEFINER (migracao 015), nao mais por INSERT
+    // direto: antes o proprio usuario podia forjar o registro do proprio
+    // acesso, o que tirava o valor probatorio do log (achado P-09 do parecer
+    // LGPD). A funcao deriva user_id e email do JWT, ignorando o que o
+    // cliente enviar.
+    await sbClient.rpc("registrar_login", {
+      p_user_agent: (typeof navigator !== "undefined" ? navigator.userAgent : "").slice(0, 300)
     });
   } catch (e) { dbg("logLogin falhou (ignorado):", e); }
 }
