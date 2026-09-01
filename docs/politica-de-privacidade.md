@@ -94,11 +94,21 @@ Os únicos terceiros que tratam dados em nosso nome (**operadores**, Art. 39) s�
 
 ## 6. Transferência internacional
 
-Nossa infraestrutura pode processar dados **fora do Brasil**
-(região: [PREENCHER: verificar no painel do Supabase; ex. `sa-east-1`/São Paulo
-ou outra]). Quando há transferência internacional, ela se apoia nas **cláusulas
-contratuais padrão** aprovadas pela ANPD na Resolução CD/ANPD nº 19/2024, nos
-termos do Art. 33 da LGPD.
+**Seu banco de dados fica no Brasil.** Todos os dados do sistema — agenda,
+financeiro, logística, cadastros e registros de auditoria — são armazenados em
+servidores localizados em **São Paulo, Brasil** (região `sa-east-1`). Não há
+transferência internacional do banco de dados.
+
+Há, porém, dois tratamentos acessórios processados no exterior:
+
+- **hCaptcha** (Estados Unidos): recebe o endereço IP e sinais de interação
+  apenas no momento em que você preenche a verificação antirrobô na tela de
+  login. Nenhum dado da sua agenda, financeiro ou de viagem é enviado.
+- **Vercel** (rede global): entrega os arquivos da interface e registra dados
+  técnicos de conexão, que podem ser processados fora do país.
+
+Essas transferências apoiam-se nas **cláusulas contratuais padrão** aprovadas
+pela ANPD na Resolução CD/ANPD nº 19/2024, nos termos do Art. 33 da LGPD.
 
 ## 7. Por quanto tempo guardamos
 

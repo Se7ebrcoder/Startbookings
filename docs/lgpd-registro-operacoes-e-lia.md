@@ -8,6 +8,9 @@ Formato simplificado admitido para agente de pequeno porte — Resolução CD/AN
 - **Canal do titular:** [PREENCHER: e-mail]
 - **Encarregado:** dispensada a indicação formal para agente de pequeno porte, desde que
   mantido o canal acima (Res. CD/ANPD nº 2/2022, Art. 11).
+- **Localização do banco de dados:** ✅ **`sa-east-1` — São Paulo, Brasil** (confirmado em
+  30/08/2026). O banco **não** sai do país; a transferência internacional limita-se ao
+  hCaptcha (EUA) e aos registros técnicos da Vercel.
 
 ---
 

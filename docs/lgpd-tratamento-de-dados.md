@@ -102,9 +102,10 @@ Parecer completo: artifact publicado em 30/08/2026 (ver histórico do projeto).
   localizador ficam em cópia permanente, o que **torna o direito de eliminação inexequível**
   (Art. 18, VI). Corrigir: gravar só campos alterados + redigir campos de risco + expurgo.
 - **P-02 — Retenção indeterminada** (ver tabela acima).
-- **P-06 — Transferência internacional sem instrumento.** Verificar região do Supabase
-  (se `sa-east-1`, o dado fica no Brasil) e aceitar/solicitar os DPAs de Supabase e Vercel.
-  Cláusulas-padrão: Resolução CD/ANPD nº 19/2024.
+- **P-06 — Transferência internacional.** ✅ **Muito reduzido:** confirmado em 30/08/2026 que
+  o banco está em **`sa-east-1` (São Paulo, Brasil)** — o banco de dados **não sai do país**.
+  Resta apenas transferência acessória para hCaptcha (EUA) e registros técnicos da Vercel,
+  já declarados na Política. Pendente: aceitar/solicitar os DPAs de Supabase e Vercel.
 
 **🟠 Relevantes**
 - **P-03 — Localizador (PNR) é credencial, não dado descritivo.** Permite alterar/cancelar a
