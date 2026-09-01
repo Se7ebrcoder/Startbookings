@@ -8,6 +8,7 @@ import { initModalA11y } from './ui/modal.js';
 import { initTableSorting, initTableFilters, renderEventTable } from './features/events/table.js';
 import { initEventModal } from './features/events/modal.js';
 import { initSettings, initColorPicker, updateConfigLists } from './features/settings/view.js';
+import { initMfaUI } from './features/settings/mfa-ui.js';
 import { initClientModule } from './features/clients/modal.js';
 import { renderClientsView } from './features/clients/view.js';
 import { initLogisticsModule } from './features/logistics/form.js';
@@ -39,6 +40,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   initEventModal();
   initSettings();
   initColorPicker();
+  initMfaUI();
   initClientModule();
   initLogisticsModule();
   initKanban();

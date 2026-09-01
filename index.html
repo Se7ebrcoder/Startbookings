@@ -574,6 +574,38 @@
 
           <!-- Artist Management Card -->
           <div class="settings-card" id="admin-artists-card">
+            <h3 class="settings-section-title">Verificação em duas etapas (2FA)</h3>
+            <p style="color: var(--text-muted); font-size: 13px; margin-top: -6px;">
+              Protege sua conta mesmo que a senha vaze. Use um aplicativo autenticador
+              (Google Authenticator, Authy, 1Password ou similar).
+            </p>
+            <div id="mfa-status" style="margin: 12px 0; font-size: 14px;"></div>
+
+            <div id="mfa-enroll-area" style="display:none; margin-top: 12px;">
+              <p style="font-size: 13px; margin-bottom: 8px;">
+                1. Escaneie o QR Code no seu aplicativo autenticador:
+              </p>
+              <div id="mfa-qr" style="background:#fff; padding:12px; border-radius:8px; display:inline-block;"></div>
+              <p style="font-size: 12px; color: var(--text-muted); margin: 10px 0 4px;">
+                Não consegue escanear? Digite este código no aplicativo:
+              </p>
+              <code id="mfa-secret" style="display:block; word-break:break-all; font-size:12px; margin-bottom:14px;"></code>
+              <div class="form-group" style="max-width: 220px;">
+                <label for="mfa-enroll-code">2. Digite o código gerado</label>
+                <input type="text" id="mfa-enroll-code" class="form-control" inputmode="numeric"
+                       maxlength="6" placeholder="000000"
+                       style="letter-spacing:6px; text-align:center; font-size:18px;">
+              </div>
+              <p id="mfa-enroll-error" role="alert" style="color: var(--danger, #ff453a); font-size: 13px; min-height:18px; margin:0 0 8px;"></p>
+              <button type="button" class="btn-primary" id="mfa-enroll-confirm">Ativar 2FA</button>
+              <button type="button" class="btn-secondary" id="mfa-enroll-cancel">Cancelar</button>
+            </div>
+
+            <button type="button" class="btn-primary" id="mfa-enroll-start">Ativar verificação em duas etapas</button>
+            <button type="button" class="btn-secondary" id="mfa-remove" style="display:none;">Desativar 2FA</button>
+          </div>
+
+          <div class="settings-card">
             <h3 class="settings-section-title">Gerenciar Artistas</h3>
             <form id="add-artist-form">
               <div class="form-row-3" style="align-items: flex-end;">
@@ -900,6 +932,60 @@
 
   <!-- Javascript File -->
   <script type="module" src="js/main.js?v=1"></script>
+  <!-- PORTA DE ACEITE DOS TERMOS (bloqueante; sem X e sem fechar por fora) -->
+  <div class="modal-overlay" id="terms-gate-modal" style="z-index: 20000; align-items: center; justify-content: center;">
+    <div class="modal-content" style="max-width: 560px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Termos de Uso e Privacidade</h3>
+      </div>
+      <div class="modal-body" style="padding: 20px;">
+        <p style="margin-top:0;">
+          Para continuar, confirme que leu e concorda com os
+          <a href="termos.html" target="_blank" rel="noopener">Termos de Uso</a> e a
+          <a href="privacidade.html" target="_blank" rel="noopener">Política de Privacidade</a>
+          (versão <b id="terms-gate-version">1.0</b>).
+        </p>
+        <p style="color: var(--text-muted); font-size: 13px;">
+          Você acessa dados sensíveis da operação — agenda, valores e roteiros de viagem
+          de artistas. Ao aceitar, você assume o <b>dever de sigilo</b> sobre essas
+          informações, inclusive após o fim do seu vínculo.
+        </p>
+        <label style="display:flex; gap:10px; align-items:flex-start; margin-top:16px; cursor:pointer;">
+          <input type="checkbox" id="terms-gate-check" style="margin-top:3px;">
+          <span>Li e concordo com os Termos de Uso e com a Política de Privacidade.</span>
+        </label>
+        <p id="terms-gate-error" role="alert" style="color: var(--danger, #ff453a); font-size: 13px; min-height: 18px; margin: 10px 0 0;"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" id="terms-gate-decline">Recusar e sair</button>
+        <button type="button" class="btn-primary" id="terms-gate-accept" disabled>Li e aceito</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DESAFIO DE SEGUNDO FATOR (TOTP) -->
+  <div class="modal-overlay" id="mfa-challenge-modal" style="z-index: 20000; align-items: center; justify-content: center;">
+    <div class="modal-content" style="max-width: 420px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Verificação em duas etapas</h3>
+      </div>
+      <div class="modal-body" style="padding: 20px;">
+        <p style="margin-top:0;">Digite o código de 6 dígitos do seu aplicativo autenticador.</p>
+        <div class="form-group">
+          <label for="mfa-challenge-code">Código</label>
+          <input type="text" id="mfa-challenge-code" class="form-control" inputmode="numeric"
+                 autocomplete="one-time-code" maxlength="6" placeholder="000000"
+                 style="letter-spacing: 6px; font-size: 20px; text-align: center;">
+        </div>
+        <p id="mfa-challenge-error" role="alert" style="color: var(--danger, #ff453a); font-size: 13px; min-height: 18px; margin: 0;"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" id="mfa-challenge-cancel">Cancelar</button>
+        <button type="button" class="btn-primary" id="mfa-challenge-verify">Verificar</button>
+      </div>
+    </div>
+  </div>
+
 </body>
 
 </html>

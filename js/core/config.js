@@ -5,6 +5,11 @@ export const DEFAULT_SELLERS = [];
 export const DEFAULT_GOAL = 3500000;
 export const DEFAULT_EVENTS = [];
 
+// Versão vigente dos Termos de Uso e da Política de Privacidade.
+// ⚠️ Ao subir esta versão, TODOS os usuários (inclusive quem já aceitou) voltam
+// a ver a tela de aceite no próximo login. Use ao alterar os documentos.
+export const TERMS_VERSION = "1.0";
+
 // Versão dos dados em cache; bump força limpeza única do localStorage.
 export const SB_DATA_VERSION = "4";
 

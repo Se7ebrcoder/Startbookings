@@ -4,6 +4,8 @@ import { sbClient, captchaTokens, resetCaptcha } from '../core/supabase.js';
 import { appState, clearLocalPII } from '../core/state.js';
 import { friendlyAuthError } from '../utils/auth-errors.js';
 import { checkLoginThrottle, recordLoginFailure, recordLoginSuccess } from './login-throttle.js';
+import { precisaDesafioMfa, abrirDesafioMfa } from './mfa.js';
+import { jaAceitouTermos, abrirPortaDeTermos } from '../features/terms/gate.js';
 import { fetchProfileData, roleLabelFromProfile, startSessionTokenCheck, logLogin } from '../data/profiles.repo.js';
 import { applyRoleUIChanges } from '../ui/nav.js';
 import { showToast, showWarningToast, showAppLoading, hideAppLoading } from '../ui/toast.js';
@@ -197,6 +199,28 @@ export function initLogin() {
         // (editável pelo usuário — nunca confiar).
         const profData = await fetchProfileData(user.id);
         const roleFound = roleLabelFromProfile(profData, user);
+
+        // --- 2º fator (TOTP): se a conta tem fator verificado, esta sessao
+        // precisa passar pelo desafio antes de liberar qualquer dado.
+        if (await precisaDesafioMfa()) {
+          const passou = await abrirDesafioMfa();
+          if (!passou) {
+            await sbClient.auth.signOut();
+            showWarningToast("Verificacao em duas etapas nao concluida. Entre novamente.");
+            return;
+          }
+        }
+
+        // --- Aceite dos Termos e da Politica: vale para TODOS (inclusive
+        // contas antigas), pois o aceite e por versao. Quem recusa, sai.
+        if (!(await jaAceitouTermos())) {
+          const aceitou = await abrirPortaDeTermos();
+          if (!aceitou) {
+            await sbClient.auth.signOut();
+            showWarningToast("E preciso aceitar os Termos para usar o sistema.");
+            return;
+          }
+        }
 
         appState.currentRole = roleFound;
         try { sessionStorage.setItem("sb_current_role", roleFound); } catch (e) { }
