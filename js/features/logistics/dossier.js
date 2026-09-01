@@ -123,6 +123,13 @@ function blocoHospedagem(numero, dados) {
   }
   const h = dados.hotel || {};
   const temCheck = !vazio(h.checkin) || !vazio(h.checkout);
+  // Marcada como "tem hospedagem" mas sem nenhum dado preenchido: mostrar uma
+  // faixa de destaque com um travessao solto so polui. Melhor dizer o que falta.
+  if (vazio(h.nome) && vazio(h.endereco) && !temCheck) {
+    return `<section class="rt-bloco">
+      <div class="rt-bloco-cab"><span class="rt-num">${numero}</span><h3>Hospedagem</h3></div>
+      <p class="rt-vazio">Hospedagem ainda não informada.</p></section>`;
+  }
   return `<section class="rt-bloco">
     <div class="rt-bloco-cab"><span class="rt-num">${numero}</span><h3>Hospedagem</h3></div>
     <div class="rt-destaque">
