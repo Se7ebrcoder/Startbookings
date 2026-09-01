@@ -30,8 +30,34 @@ if (!URL_BANCO) {
   process.exit(1);
 }
 
-const destino = process.argv[2]
-  || path.join(os.homedir(), 'StartBookings-Backups', carimbo());
+// --- 1 BACKUP POR INICIALIZACAO -------------------------------------------
+// A tarefa agendada dispara a cada logon. Se a pessoa sair e entrar de novo,
+// ou o Windows reiniciar a tarefa, nao queremos backups duplicados. Comparamos
+// o backup mais recente com o momento em que a maquina ligou.
+// Use --force para rodar assim mesmo (backup manual).
+const FORCAR = process.argv.includes('--force');
+const RAIZ_BACKUPS = path.join(os.homedir(), 'StartBookings-Backups');
+
+if (!FORCAR && fs.existsSync(RAIZ_BACKUPS)) {
+  const ligouEm = Date.now() - os.uptime() * 1000;
+  const maisRecente = fs.readdirSync(RAIZ_BACKUPS, { withFileTypes: true })
+    .filter(d => d.isDirectory())
+    .map(d => fs.statSync(path.join(RAIZ_BACKUPS, d.name)).mtimeMs)
+    .sort((a, b) => b - a)[0];
+
+  if (maisRecente && maisRecente > ligouEm) {
+    const h = new Date(maisRecente).toLocaleString('pt-BR');
+    console.log(`\nJa existe backup desta inicializacao (${h}). Nada a fazer.`);
+    console.log('Para forcar um backup manual: node scripts/backup-dados.mjs --force\n');
+    process.exit(0);
+  }
+}
+
+
+// Destino = primeiro argumento que NAO seja flag. Sem isso, `--force` era
+// tomado como caminho e o backup ia parar numa pasta chamada '--force'.
+const argDestino = process.argv.slice(2).find(a => !a.startsWith('--'));
+const destino = argDestino || path.join(RAIZ_BACKUPS, carimbo());
 
 function carimbo() {
   const d = new Date();
@@ -171,5 +197,49 @@ fs.writeFileSync(
 );
 
 console.log(`\n  Total: ${totalLinhas} linhas em dados.sql (${kb} KB)`);
+// =====================================================================
+//  RETENCAO por TAMANHO da pasta (regra definida pelo usuario)
+//  Ao atingir 3 GB, apaga os 5 backups mais antigos. Repete enquanto
+//  continuar acima do limite. Nunca apaga o backup recem-criado.
+// =====================================================================
+const LIMITE_BYTES = 3 * 1024 * 1024 * 1024;   // 3 GB
+const APAGAR_POR_VEZ = 5;
+
+function tamanhoDe(dir) {
+  let t = 0;
+  for (const it of fs.readdirSync(dir, { withFileTypes: true })) {
+    const q = path.join(dir, it.name);
+    t += it.isDirectory() ? tamanhoDe(q) : fs.statSync(q).size;
+  }
+  return t;
+}
+const gb = (b) => (b / 1024 / 1024 / 1024).toFixed(2);
+
+// SEMPRE a pasta de backups — nunca derivada do destino, senao um destino
+// relativo faria a limpeza apontar para a pasta errada (ex.: o projeto).
+const raizRet = RAIZ_BACKUPS;
+let usado = tamanhoDe(raizRet);
+console.log(`\n  Pasta de backups: ${gb(usado)} GB de 3.00 GB`);
+
+while (usado >= LIMITE_BYTES) {
+  const candidatos = fs.readdirSync(raizRet, { withFileTypes: true })
+    .filter(d => d.isDirectory()).map(d => d.name).sort()   // nome = data/hora
+    .filter(n => path.join(raizRet, n) !== destino);        // preserva o atual
+
+  if (candidatos.length === 0) {
+    console.log('  Limite atingido, mas nao ha backup antigo para remover.');
+    break;
+  }
+  const remover = candidatos.slice(0, APAGAR_POR_VEZ);
+  console.log(`  Limite de 3 GB atingido — removendo ${remover.length} mais antigo(s):`);
+  for (const n of remover) {
+    fs.rmSync(path.join(raizRet, n), { recursive: true, force: true });
+    console.log(`    - ${n}`);
+  }
+  usado = tamanhoDe(raizRet);
+  console.log(`  Pasta agora: ${gb(usado)} GB`);
+}
+
+
 console.log(`\nBackup concluido: ${destino}`);
 console.log(`Guarde uma copia FORA deste computador.\n`);

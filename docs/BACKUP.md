@@ -242,3 +242,68 @@ viagem de artistas** (o dado de maior risco do sistema). Portanto:
 - [ ] Agendar a execução semanal
 - [ ] **Testar uma restauração** num projeto novo
 - [ ] Avaliar o plano Pro (backup automático diário)
+
+---
+
+## Backup automatico no logon (instalado em 01/09/2026)
+
+O backup roda **sozinho toda vez que voce liga o computador**. Nao ha nada a
+fazer no dia a dia.
+
+**Como foi instalado:** um lancador em
+`%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\StartBookings-Backup.vbs`.
+
+> Por que a pasta Inicializar e nao o Agendador de Tarefas? Criar tarefa
+> agendada neste PC exige privilegio de administrador (`Acesso negado`). A
+> pasta Inicializar dispara no logon igual, sem exigir elevacao — e as
+> condicoes que o Agendador ofereceria ja estao dentro do proprio script.
+
+**O que acontece a cada logon:**
+
+1. Espera a internet ficar **realmente** disponivel — testa alcancar o
+   Supabase, ate 20 tentativas de 30s (10 min). Nao basta a placa de rede
+   estar ativa: no logon ela sobe antes de DNS e rota funcionarem.
+2. Faz **1 backup por inicializacao**. Se voce sair e entrar de novo na mesma
+   sessao ligada, ele detecta e nao duplica.
+3. Aplica a **retencao de 3 GB**: ao atingir esse tamanho, remove os **5
+   backups mais antigos**, repetindo ate ficar abaixo do limite. O backup
+   recem-criado nunca e removido.
+4. Registra tudo em `StartBookings-Backups\_log-backup.txt`.
+
+**Conferir se rodou:**
+
+```powershell
+Get-Content "$env:USERPROFILE\StartBookings-Backups\_log-backup.txt" -Tail 20
+```
+
+**Forcar um backup manual** (ignora a regra de 1 por inicializacao):
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\backup-agendado.ps1 -Forcar
+```
+
+**Desativar:** apague o arquivo `.vbs` da pasta Inicializar.
+
+### Se preferir uma Tarefa Agendada de verdade
+
+Abra o PowerShell **como administrador** e rode:
+
+```powershell
+schtasks /Create /TN "StartBookings-Backup" /SC ONLOGON /RL LIMITED /F ^
+  /TR "C:\Users\raian\AppData\Local\StartBookings\backup-launcher.cmd"
+```
+
+O lancador `.cmd` ja esta criado nesse caminho (sem espacos, porque o
+`schtasks` nao lida bem com eles). Se fizer isso, apague o `.vbs` da pasta
+Inicializar para nao rodar duas vezes.
+
+### Observacao sobre o limite de 3 GB
+
+Cada backup ocupa cerca de **127 KB**. Para chegar a 3 GB seriam
+aproximadamente **24 mil backups** — mais de 60 anos rodando uma vez por dia.
+Na pratica o limite nunca sera atingido, e os backups vao se acumular
+indefinidamente.
+
+Isso **contradiz a politica de retencao** definida no parecer de LGPD (backup
+tambem e tratamento de dados e precisa de prazo). Vale considerar um limite
+por tempo — por exemplo, manter 90 dias — em vez de so por tamanho.
