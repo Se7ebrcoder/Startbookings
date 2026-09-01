@@ -3400,6 +3400,21 @@ body.role-logistica .stat-badge-header {
     min-height: 0 !important;
   }
 
+  /* `body *` NAO alcanca pseudo-elementos. O body::after e uma camada fixa de
+     granulacao (mix-blend-mode: overlay) que cobre a tela inteira e continuava
+     pintando sobre a folha. Precisa ser desligado explicitamente. */
+  body::before, body::after, html::before, html::after {
+    display: none !important;
+    content: none !important;
+  }
+
+  /* O body e um flex container de altura de viewport; na folha isso empurra
+     o layout. Volta a fluxo normal para a impressao. */
+  body {
+    display: block !important;
+    overflow: visible !important;
+  }
+
   body * { visibility: hidden; }
   #logistics-print-area, #logistics-print-area * { visibility: visible; }
   #logistics-print-area {
