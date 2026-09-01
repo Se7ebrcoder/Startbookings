@@ -216,3 +216,10 @@ describe('Testes de Funcionalidades Base (StartBookings)', () => {
     expect(localStorage.getItem('sb_data_version')).toBe('3');
   });
 });
+
+test('friendlyAuthError explica cadastro nao liberado (allowlist)', () => {
+  expect(app.friendlyAuthError('Database error saving new user'))
+    .toMatch(/nao esta liberado para cadastro/);
+  expect(app.friendlyAuthError('E-mail nao autorizado para cadastro no StartBookings'))
+    .toMatch(/nao esta liberado para cadastro/);
+});

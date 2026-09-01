@@ -35,6 +35,7 @@ Supabase → **SQL Editor** → New query → cole o conteúdo de cada arquivo e
 | 016 | `016_lgpd_retencao_logistica.sql` | mascara o localizador em D+2 e anonimiza o roteiro em D+90, preservando os valores do Financeiro | 004 |
 | 017 | `017_lgpd_direitos_do_titular.sql` | `exportar_dados_titular()`, `anonimizar_titular()` e tabela de registro de solicitações (Art. 18) | 001, 004, 005, 010 |
 | 018 | `018_agenda_expurgos_pg_cron.sql` | agenda os 4 expurgos no pg_cron. **Rodar DEPOIS de habilitar a extensão** — as 015/016 só agendam se ela já existir | 015, 016, pg_cron |
+| 019 | `019_cadastro_por_allowlist.sql` | autocadastro segue ligado, mas só aceita e-mails já vinculados (artist/booker/logistics/allowlist). Cria `signup_allowlist` | 001, 004, 005, 012 |
 
 > 🟢 **015 a 017 são de conformidade LGPD** (parecer de 30/08/2026). Nenhuma delas apaga
 > dados ao ser executada: criam funções e agendamentos. A 015 **exige o deploy do frontend
