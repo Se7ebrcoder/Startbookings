@@ -2953,32 +2953,6 @@ body.role-logistica .stat-badge-header {
 #logistics-print-area { display: none; }
 .logi-dossier h4 { font-size: 14px; }
 
-@media print {
-  body * { visibility: hidden; }
-  #logistics-print-area, #logistics-print-area * { visibility: visible; }
-  #logistics-print-area {
-    display: block !important;
-    position: absolute; left: 0; top: 0; width: 100%;
-    background: #fff; color: #000; padding: 24px;
-  }
-  .logi-print-doc h2, .logi-print-doc h4, .logi-print-doc strong, .logi-print-doc p { color: #000 !important; }
-  .logi-print-doc td { color: #000 !important; border-bottom: 1px solid #ddd; }
-}
-
-/* Seletor de cor redondo (lista de artistas/equipe) — abre a paleta nativa completa */
-.color-dot-input {
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  border: 1px solid var(--border-color);
-  padding: 0;
-  cursor: pointer;
-  background: none;
-  vertical-align: middle;
-}
 .color-dot-input:hover { box-shadow: 0 0 0 2px rgba(255, 204, 0, 0.3); }
 .color-dot-input::-webkit-color-swatch-wrapper { padding: 0; }
 .color-dot-input::-webkit-color-swatch { border: none; border-radius: 50%; }
@@ -3294,4 +3268,148 @@ body.role-logistica .stat-badge-header {
   .table-responsive { -webkit-overflow-scrolling: touch; }
   .clickup-table th, .clickup-table td { padding-left: 8px; padding-right: 8px; }
   .clickup-table .inline-edit-input { width: 78px !important; }
+}
+
+/* ====================================================================
+   ROTEIRO DE VIAGEM — documento em folha branca
+   O mesmo markup serve para a previa no modal e para o PDF. Cores fixas
+   (nao usam as variaveis do tema escuro) porque isto e um documento
+   impresso: precisa ficar legivel no papel independentemente do tema.
+   ==================================================================== */
+.rt-folha {
+  background: #fff;
+  padding: 28px 30px;
+  border-radius: 8px;
+  max-height: 62vh;
+  overflow-y: auto;
+}
+
+.rt-doc {
+  color: #1a1a1e;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  font-size: 13px;
+  line-height: 1.55;
+  max-width: 780px;
+  margin: 0 auto;
+}
+
+/* Cabecalho: logo a esquerda, tipo do documento a direita */
+.rt-cab {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: 20px; padding-bottom: 12px; border-bottom: 2px solid #1a1a1e;
+}
+.rt-logo { height: 42px; width: auto; }
+.rt-cab-dir { text-align: right; }
+.rt-tipo {
+  font-size: 15px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+}
+.rt-emissao { font-size: 11px; color: #6b6b72; margin-top: 2px; }
+
+/* Quem viaja e para onde — a informacao que identifica o documento */
+.rt-identificacao { padding: 16px 0 4px; }
+.rt-artista {
+  font-size: 25px; font-weight: 700; line-height: 1.15; letter-spacing: -.015em;
+}
+.rt-evento { font-size: 14px; margin-top: 3px; }
+.rt-sep { color: #a9a9b0; }
+.rt-local { font-size: 12.5px; color: #6b6b72; margin-top: 1px; }
+
+/* Cada etapa da viagem */
+.rt-bloco { margin-top: 20px; page-break-inside: avoid; break-inside: avoid; }
+.rt-bloco-cab { display: flex; align-items: center; gap: 9px; margin-bottom: 8px; }
+.rt-num {
+  width: 21px; height: 21px; flex: none; border-radius: 50%;
+  background: #1a1a1e; color: #fff;
+  font-size: 11.5px; font-weight: 700;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.rt-bloco-cab h3 {
+  margin: 0; font-size: 14px; font-weight: 700;
+  letter-spacing: .05em; text-transform: uppercase;
+}
+.rt-modo {
+  margin-left: auto; font-size: 10.5px; letter-spacing: .05em; text-transform: uppercase;
+  color: #6b6b72; border: 1px solid #d6d6dc; border-radius: 3px; padding: 2px 7px;
+}
+
+/* A linha que se le de relance: voo/horarios, hotel/check-in */
+.rt-destaque {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 14px; flex-wrap: wrap;
+  border-left: 3px solid #bf9100; background: #faf7ec;
+  padding: 8px 12px; margin-bottom: 8px;
+}
+.rt-destaque strong { font-size: 15.5px; }
+.rt-destaque span { font-size: 13px; color: #45454c; white-space: nowrap; }
+
+/* Tabela rotulo/valor */
+.rt-campos { width: 100%; border-collapse: collapse; }
+.rt-campos th {
+  width: 34%; text-align: left; font-weight: 500; color: #6b6b72;
+  padding: 4px 10px 4px 0; vertical-align: top; white-space: nowrap;
+  border-bottom: 1px solid #ececf0; font-size: 12.5px;
+}
+.rt-campos td {
+  padding: 4px 0; vertical-align: top;
+  border-bottom: 1px solid #ececf0; font-size: 12.5px;
+}
+.rt-campos tr:last-child th, .rt-campos tr:last-child td { border-bottom: none; }
+
+/* Conexoes: cada uma e um bloco proprio, nao uma linha espremida */
+.rt-conexoes { margin-top: 10px; }
+.rt-sub {
+  font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase;
+  color: #6b6b72; margin-bottom: 5px;
+}
+.rt-conexao {
+  border: 1px solid #e2e2e8; border-radius: 5px;
+  padding: 8px 11px; margin-bottom: 7px; page-break-inside: avoid; break-inside: avoid;
+}
+.rt-conexao-topo {
+  display: flex; gap: 9px; align-items: baseline;
+  font-size: 11px; letter-spacing: .05em; text-transform: uppercase; color: #6b6b72;
+  margin-bottom: 5px;
+}
+.rt-conexao-topo span {
+  font-size: 13.5px; letter-spacing: 0; text-transform: none;
+  color: #1a1a1e; font-weight: 600;
+}
+
+.rt-vazio { color: #85858d; font-style: italic; margin: 2px 0 0; font-size: 12.5px; }
+
+.rt-rodape {
+  margin-top: 26px; padding-top: 10px; border-top: 1px solid #d6d6dc;
+  font-size: 10.5px; color: #6b6b72; line-height: 1.5;
+}
+.rt-rodape strong { color: #1a1a1e; }
+
+/* ====================================================================
+   IMPRESSAO / PDF
+   ==================================================================== */
+@media print {
+  @page { size: A4; margin: 14mm 15mm; }
+
+  body * { visibility: hidden; }
+  #logistics-print-area, #logistics-print-area * { visibility: visible; }
+  #logistics-print-area {
+    display: block !important;
+    position: absolute; left: 0; top: 0; width: 100%;
+    background: #fff;
+  }
+
+  /* Garante que o fundo do destaque e o circulo numerado saiam impressos,
+     mesmo com "graficos de plano de fundo" desligado no dialogo de impressao. */
+  .rt-destaque, .rt-num {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .rt-doc { max-width: none; font-size: 11.5pt; }
+  .rt-artista { font-size: 21pt; }
+  .rt-folha { padding: 0; max-height: none; overflow: visible; }
+
+  /* Nao deixa um bloco comecar no rodape e continuar na pagina seguinte */
+  .rt-bloco, .rt-conexao { page-break-inside: avoid; break-inside: avoid; }
+  .rt-cab { page-break-after: avoid; }
+  .rt-rodape { page-break-before: avoid; }
 }
