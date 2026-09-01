@@ -9,11 +9,14 @@
 #   projeto levaria embora agenda, financeiro, clientes e logistica.
 #
 #  COMO USAR
-#   1. Pegue a senha do banco: Supabase > Project Settings > Database >
-#      Connection string > URI (marque "Use connection pooling" = NAO).
+#   1. No painel do Supabase, clique no botao "Connect" no topo da pagina do
+#      projeto e copie a URI da aba "Session pooler" (porta 5432).
+#      NAO use a conexao direta: neste projeto ela resolve so em IPv6 e nao
+#      responde de rede IPv4 comum. NAO use o Transaction pooler (6543): ele
+#      nao suporta prepared statements e o dump falha.
 #   2. Guarde a string num arquivo local que NAO vai para o Git:
 #        scripts\.backup-env.ps1  com a linha:
-#        $env:SB_DB_URL = "postgresql://postgres:SENHA@db.xxxx.supabase.co:5432/postgres"
+#        $env:SB_DB_URL = "postgresql://postgres.<ref>:SENHA@aws-0-sa-east-1.pooler.supabase.com:5432/postgres"
 #   3. Rode:  powershell -ExecutionPolicy Bypass -File scripts\backup.ps1
 #
 #  O QUE GERA (3 arquivos por execucao, dentro de uma pasta com a data)
@@ -43,9 +46,9 @@ if (-not $env:SB_DB_URL) {
   Write-Host "ERRO: a variavel SB_DB_URL nao esta definida." -ForegroundColor Red
   Write-Host ""
   Write-Host "Crie o arquivo scripts\.backup-env.ps1 com a linha:" -ForegroundColor Yellow
-  Write-Host '  $env:SB_DB_URL = "postgresql://postgres:SUA_SENHA@db.SEU_PROJETO.supabase.co:5432/postgres"'
+  Write-Host '  $env:SB_DB_URL = "postgresql://postgres.SEU_REF:SUA_SENHA@aws-0-sa-east-1.pooler.supabase.com:5432/postgres"'
   Write-Host ""
-  Write-Host "A senha esta em: Supabase > Project Settings > Database > Connection string > URI"
+  Write-Host "Copie em: painel do Supabase > botao Connect (topo) > aba Session pooler"
   Write-Host "(esse arquivo ja esta no .gitignore e NAO vai para o GitHub)"
   Write-Host ""
   exit 1

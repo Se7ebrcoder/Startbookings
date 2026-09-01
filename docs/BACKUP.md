@@ -51,14 +51,30 @@ Um script já pronto exporta tudo para o seu computador.
 ### Configuração — uma única vez
 
 1. **Pegue a string de conexão:**
-   Supabase → **Project Settings** → **Database** → **Connection string** →
-   aba **URI**. Deixe "Use connection pooling" **desmarcado**.
-   Ela se parece com:
-   `postgresql://postgres:SUA_SENHA@db.jijjacpgbnubamawbscw.supabase.co:5432/postgres`
+   No painel do Supabase, clique no botão **"Connect"** no topo da página do
+   projeto (ao lado do nome do projeto). Abre um painel com várias abas.
+
+   Escolha **Session pooler** e copie a URI. Ela se parece com:
+   ```
+   postgresql://postgres.jijjacpgbnubamawbscw:SUA_SENHA@aws-0-sa-east-1.pooler.supabase.com:5432/postgres
+   ```
+
+   > ⚠️ **Use o Session pooler, não a conexão direta.** Verificado neste
+   > projeto: o host da conexão direta (`db.jijjacpgbnubamawbscw.supabase.co`)
+   > resolve **somente em IPv6**, e IPv4 nela é um add-on pago — de uma rede
+   > doméstica comum ela simplesmente não responde. O **Session pooler**
+   > atende em IPv4 em todos os planos e, por operar em *modo sessão*
+   > (porta **5432**), funciona com `pg_dump`.
+   >
+   > **Não use o Transaction pooler** (porta **6543**): ele não suporta
+   > *prepared statements* e o dump falha.
+
+   Repare que no pooler o usuário tem o formato `postgres.<ref-do-projeto>`,
+   e não apenas `postgres`. Copie do painel em vez de montar à mão.
 
 2. **Crie o arquivo `scripts\.backup-env.ps1`** com uma linha:
    ```powershell
-   $env:SB_DB_URL = "postgresql://postgres:SUA_SENHA@db.jijjacpgbnubamawbscw.supabase.co:5432/postgres"
+   $env:SB_DB_URL = "postgresql://postgres.jijjacpgbnubamawbscw:SUA_SENHA@aws-0-sa-east-1.pooler.supabase.com:5432/postgres"
    ```
    ⚠️ Esse arquivo contém a **senha do banco**. Ele já está no `.gitignore` e
    **nunca** deve ir para o GitHub.
