@@ -69,6 +69,8 @@ neste projeto. Foi ele que:
 > ⚠️ **A ordem importa.** Rodar o SQL **ANTES** de publicar o frontend, senão o
 > site novo tenta ler/gravar em algo que ainda não existe e falha (ou perde dados).
 
+0. **Faça um backup ANTES** (`scripts/backup.ps1`). Se o SQL der errado, é a
+   sua rede de segurança. Ver [BACKUP.md](BACKUP.md).
 1. **Crie a migração** como novo arquivo numerado em `migrations/` (ex.:
    `013_minha_mudanca.sql`). Ela deve ser **idempotente**
    (`create ... if not exists`, `create or replace`, `on conflict do ...`,

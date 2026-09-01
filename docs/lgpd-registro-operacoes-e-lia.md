@@ -5,7 +5,7 @@ Base: LGPD Art. 37 (registro) e Art. 10 (legítimo interesse).
 Formato simplificado admitido para agente de pequeno porte — Resolução CD/ANPD nº 2/2022.
 
 - **Controlador:** [PREENCHER: razão social / CNPJ]
-- **Canal do titular:** [PREENCHER: e-mail]
+- **Canal do titular:** startbookings@gmail.com
 - **Encarregado:** dispensada a indicação formal para agente de pequeno porte, desde que
   mantido o canal acima (Res. CD/ANPD nº 2/2022, Art. 11).
 - **Localização do banco de dados:** ✅ **`sa-east-1` — São Paulo, Brasil** (confirmado em

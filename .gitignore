@@ -6,6 +6,11 @@ node_modules/
 .env.*
 *.local
 
+# Credencial do backup (contém a SENHA do banco) e dumps gerados
+scripts/.backup-env.ps1
+*.dump
+StartBookings-Backups/
+
 # Build / cache da Vercel
 .vercel
 .cache
