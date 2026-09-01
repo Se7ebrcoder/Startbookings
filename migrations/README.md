@@ -34,6 +34,7 @@ Supabase → **SQL Editor** → New query → cole o conteúdo de cada arquivo e
 | 015 | `015_lgpd_minimizacao_e_retencao.sql` | audit_logs passa a gravar só o delta e redige campos sensíveis; expurgo de audit (24m) e login (6m); login_logs gravado por RPC | 007 |
 | 016 | `016_lgpd_retencao_logistica.sql` | mascara o localizador em D+2 e anonimiza o roteiro em D+90, preservando os valores do Financeiro | 004 |
 | 017 | `017_lgpd_direitos_do_titular.sql` | `exportar_dados_titular()`, `anonimizar_titular()` e tabela de registro de solicitações (Art. 18) | 001, 004, 005, 010 |
+| 018 | `018_agenda_expurgos_pg_cron.sql` | agenda os 4 expurgos no pg_cron. **Rodar DEPOIS de habilitar a extensão** — as 015/016 só agendam se ela já existir | 015, 016, pg_cron |
 
 > 🟢 **015 a 017 são de conformidade LGPD** (parecer de 30/08/2026). Nenhuma delas apaga
 > dados ao ser executada: criam funções e agendamentos. A 015 **exige o deploy do frontend
