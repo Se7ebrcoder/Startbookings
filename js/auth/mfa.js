@@ -134,18 +134,41 @@ export async function iniciarCadastroMfa() {
 }
 
 // Confirma o cadastro com o código do aplicativo.
+// Erros sobem com a mensagem REAL do Supabase — antes qualquer falha virava
+// "codigo invalido" na tela, o que escondia a causa verdadeira (ex.: o fator
+// ter se perdido, ou o QR ter sido regerado depois de escaneado).
 export async function confirmarCadastroMfa(code) {
-  if (!sbClient || !fatorEmCadastro) throw new Error('Cadastro nao iniciado');
+  if (!sbClient) throw new Error('Sem conexao com o servidor.');
+
   const limpo = (code || '').replace(/\D/g, '');
-  if (limpo.length !== 6) throw new Error('Codigo deve ter 6 digitos');
+  if (limpo.length !== 6) throw new Error('O codigo precisa ter 6 digitos.');
 
-  const { data: ch, error: chErr } = await sbClient.auth.mfa.challenge({ factorId: fatorEmCadastro });
-  if (chErr) throw chErr;
+  // Se o id do fator se perdeu (recarregou a pagina, por exemplo), recupera o
+  // fator TOTP pendente em vez de falhar com uma mensagem enganosa.
+  let factorId = fatorEmCadastro;
+  if (!factorId) {
+    const { data, error } = await sbClient.auth.mfa.listFactors();
+    if (error) throw error;
+    const pendente = ((data && data.totp) || []).find(f => f.status !== 'verified');
+    if (!pendente) {
+      throw new Error('A ativacao expirou. Clique em "Ativar verificacao em duas etapas" para gerar um novo QR Code.');
+    }
+    factorId = pendente.id;
+  }
 
-  const { error: vErr } = await sbClient.auth.mfa.verify({
-    factorId: fatorEmCadastro, challengeId: ch.id, code: limpo
-  });
-  if (vErr) throw vErr;
+  // challengeAndVerify faz desafio + verificação numa chamada só — é o caminho
+  // recomendado pelo Supabase e reduz a janela entre um passo e outro.
+  if (typeof sbClient.auth.mfa.challengeAndVerify === 'function') {
+    const { error } = await sbClient.auth.mfa.challengeAndVerify({ factorId, code: limpo });
+    if (error) throw error;
+  } else {
+    const { data: ch, error: chErr } = await sbClient.auth.mfa.challenge({ factorId });
+    if (chErr) throw chErr;
+    const { error: vErr } = await sbClient.auth.mfa.verify({
+      factorId, challengeId: ch.id, code: limpo
+    });
+    if (vErr) throw vErr;
+  }
 
   fatorEmCadastro = null;
   return true;

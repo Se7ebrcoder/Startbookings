@@ -58,6 +58,12 @@ export function initMfaUI() {
       if (codeEl) codeEl.value = '';
       if (area) area.style.display = 'block';
       btnStart.style.display = 'none';
+      // Cada clique gera um segredo NOVO e invalida o anterior. Sem este aviso,
+      // quem clicasse duas vezes ficaria com o app dessincronizado sem entender.
+      if (erroEl) {
+        erroEl.style.color = 'var(--text-muted)';
+        erroEl.textContent = 'Se você já tinha escaneado um QR antes, apague aquela entrada no aplicativo: este QR gerou um código novo.';
+      }
       setTimeout(() => { try { codeEl.focus(); } catch (e) { } }, 60);
     } catch (e) {
       console.error('MFA: falha ao iniciar cadastro', e);
@@ -70,7 +76,7 @@ export function initMfaUI() {
   if (btnOk) btnOk.addEventListener('click', async () => {
     const code = (codeEl && codeEl.value || '').replace(/\D/g, '');
     if (code.length !== 6) {
-      if (erroEl) erroEl.textContent = 'Digite os 6 dígitos do aplicativo.';
+      if (erroEl) { erroEl.style.color = 'var(--danger, #ff453a)'; erroEl.textContent = 'Digite os 6 dígitos do aplicativo.'; }
       return;
     }
     btnOk.disabled = true;
@@ -81,7 +87,21 @@ export function initMfaUI() {
       await pintarStatus();
     } catch (e) {
       console.error('MFA: falha ao confirmar', e);
-      if (erroEl) erroEl.textContent = 'Código inválido ou expirado. Use o código atual do aplicativo.';
+      // Mostra a causa REAL. Antes qualquer erro virava "codigo invalido",
+      // o que escondia problemas como QR regerado ou relogio dessincronizado.
+      const bruto = (e && (e.message || e.error_description || e.msg)) || '';
+      let msg;
+      if (/invalid.*(totp|code)|code.*invalid/i.test(bruto)) {
+        msg = 'Código não conferiu. Duas causas comuns: (1) o QR foi gerado de novo '
+            + 'depois de você escanear — apague a entrada antiga no aplicativo e escaneie o QR atual; '
+            + '(2) o relógio do celular está fora de sincronia — no Google Authenticator, '
+            + 'menu → Configurações → Correção de horário para códigos → Sincronizar.';
+      } else if (bruto) {
+        msg = bruto;
+      } else {
+        msg = 'Não foi possível ativar. Veja o console (F12) para o detalhe.';
+      }
+      if (erroEl) { erroEl.style.color = 'var(--danger, #ff453a)'; erroEl.textContent = msg; }
       if (codeEl) { codeEl.value = ''; codeEl.focus(); }
     }
     btnOk.disabled = false;
