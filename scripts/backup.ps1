@@ -54,6 +54,20 @@ if (-not $env:SB_DB_URL) {
   exit 1
 }
 
+# --- Placeholder nao trocado? avisa de forma clara -----------------------
+if ($env:SB_DB_URL -match "SUA_SENHA") {
+  Write-Host ""
+  Write-Host "A senha ainda nao foi preenchida." -ForegroundColor Red
+  Write-Host ""
+  Write-Host "Abra o arquivo abaixo e troque SUA_SENHA_AQUI pela senha do banco:" -ForegroundColor Yellow
+  Write-Host ("  {0}" -f $envFile)
+  Write-Host ""
+  Write-Host "A senha esta em: painel do Supabase > Connect (topo) > aba Session pooler."
+  Write-Host "Nao lembra? Project Settings > Database > Reset database password."
+  Write-Host ""
+  exit 1
+}
+
 # --- Pasta desta execucao ------------------------------------------------
 $carimbo = Get-Date -Format "yyyy-MM-dd_HHmm"
 $destino = Join-Path $RaizBackup $carimbo
