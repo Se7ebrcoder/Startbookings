@@ -81,6 +81,65 @@ Um script já pronto exporta tudo para o seu computador.
 
 ### Rodar o backup
 
+> OK **Caminho validado em 31/08/2026.** Nao use o `supabase db dump` da CLI:
+> ele exige **Docker Desktop**, que nao esta instalado nesta maquina. Use o
+> exportador proprio abaixo, que conecta direto no Postgres com o driver `pg`
+> (instalado isolado em `scripts/`, fora da arvore da raiz).
+
+No terminal, **dentro da pasta do projeto**:
+
+```powershell
+cd "C:\Users\raian\OneDrive\Documentos\Projeto site StartBookings"
+. scripts\.backup-env.ps1
+node scripts\backup-dados.mjs
+```
+
+Saida esperada — a contagem por tabela e o total:
+
+```
+  events                        4 linhas
+  audit_logs                  111 linhas
+  ...
+  Total: 179 linhas em dados.sql
+```
+
+**Confira sempre o total.** Se vier 0 ou muito abaixo do esperado, o backup
+nao presta e e preciso investigar antes de confiar nele.
+
+#### Se der erro de conexao
+
+O script traduz os dois erros que importam, porque eles tem causas opostas:
+
+| Mensagem | Causa | O que fazer |
+|---|---|---|
+| `tenant/user not found` | **Host** errado | O prefixo da regiao varia (`aws-0`, `aws-1`...). Este projeto usa **`aws-1-sa-east-1`** |
+| `password authentication failed` | **Senha** errada | A senha do **banco** nao e a senha da **conta**. Reset em *Project Settings > Database* |
+
+**Senha com caractere especial** (`@ : / ? # %` ou espaco) precisa ser
+codificada na URL — `@` vira `%40`, `%` vira `%25`. Foi o que quebrou nas
+primeiras tentativas. Se puder, prefira senha so com letras e numeros.
+
+#### Conexao direta ou pooler?
+
+Ambas funcionam neste projeto, mas o **usuario muda**:
+
+- **Direta:** `postgres@db.<ref>.supabase.co:5432` — resolve so em IPv6
+- **Pooler:** `postgres.<ref>@aws-1-sa-east-1.pooler.supabase.com:5432` — IPv4
+
+Repare que no pooler o usuario leva o ref do projeto. Trocar o host sem
+trocar o usuario e a causa do `tenant/user not found`.
+
+#### Alternativa sem senha de banco
+
+Se a senha do banco se perder de novo, use `scripts/backup-rest.mjs`, que usa
+a chave `service_role` (copia e cola inteira, sem risco de codificacao):
+
+```powershell
+node scripts\backup-rest.mjs
+```
+
+### (Referencia) O que o backup gera
+
 No terminal, dentro da pasta do projeto:
 
 ```powershell
