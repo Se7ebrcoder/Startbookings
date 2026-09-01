@@ -1,0 +1,9 @@
+{
+  "name": "startbookings-scripts",
+  "private": true,
+  "type": "module",
+  "description": "Dependencias isoladas dos scripts de operacao (backup). Separado da raiz de proposito: a arvore do projeto tem um conflito de peer dependency (@babel/preset-env vs @babel/core) que impede instalar aqui sem risco de quebrar o Jest.",
+  "dependencies": {
+    "pg": "^8.13.1"
+  }
+}
