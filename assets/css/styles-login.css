@@ -276,3 +276,51 @@ input[type="number"] {
 }
 
 /* Add a subtle animation when the value changes (optional, handled by CSS transition) */
+/* =================================================================
+   RESPONSIVIDADE MOBILE — login, popovers e edição inline
+   -----------------------------------------------------------------
+   Estas regras moram AQUI, e não no bloco mobile do style.css, por
+   ordem de carregamento: o index.html carrega style.css antes deste
+   arquivo, e media query não aumenta especificidade — `.login-box`
+   daqui venceria `.login-box` de lá mesmo dentro de um @media.
+   ================================================================= */
+
+/* --- Celular e tablet em pé (<= 768px) --- */
+@media (max-width: 768px) {
+  /* Em telas baixas (e com o teclado aberto) o box centralizado ficava
+     com o topo cortado e sem como rolar até ele. */
+  .login-overlay {
+    align-items: flex-start;
+    padding: 24px 16px;
+    overflow-y: auto;
+  }
+
+  .login-box { padding: 28px 22px; }
+
+  /* O popover tem 260px fixos e é posicionado por JS — sem o teto
+     abaixo ele encosta (ou passa) da borda direita da tela. */
+  .custom-popover { max-width: calc(100vw - 24px); }
+}
+
+/* --- Celular pequeno (<= 480px) --- */
+@media (max-width: 480px) {
+  .login-box { padding: 24px 16px; }
+
+  /* O iOS dá zoom automático em campo com fonte < 16px e não volta
+     sozinho. Os campos de edição inline da TABELA ficam de fora de
+     propósito: aumentá-los estouraria a largura das colunas. */
+  .login-box input,
+  .login-box select,
+  .custom-popover-search { font-size: 16px; }
+}
+
+/* --- Telas muito estreitas (<= 360px) ---
+   O widget do hCaptcha tem 303px fixos e não é redimensionável;
+   abaixo disso ele estoura a caixa de login. */
+@media (max-width: 360px) {
+  .captcha-box {
+    transform: scale(0.9);
+    transform-origin: top center;
+    min-height: 72px;
+  }
+}

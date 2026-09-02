@@ -3491,3 +3491,211 @@ body.role-logistica .stat-badge-header {
   .rt-cab { page-break-after: avoid; }
   .rt-rodape { page-break-before: avoid; }
 }
+
+/* =================================================================
+   RESPONSIVIDADE MOBILE
+   -----------------------------------------------------------------
+   Camada final de adaptação para tablet e celular. Fica no fim do
+   arquivo de propósito: como as regras abaixo têm a mesma
+   especificidade das definições de desktop, elas só vencem por vir
+   depois. Ao adicionar novos componentes, ajuste-os AQUI, não
+   espalhe media queries pelo meio do CSS.
+
+   Abordagem desktop-first, em três degraus:
+     <=1024px  tablet / notebook pequeno
+     <=768px   celular e tablet em pé (sidebar já vira gaveta)
+     <=480px   celular pequeno (alvos de toque e coluna única)
+   ================================================================= */
+
+/* Nenhuma mídia ultrapassa a largura da tela. Sem `height: auto` em
+   img/video porque vários logos do sistema têm altura fixa própria. */
+img, video, iframe, canvas {
+  max-width: 100%;
+}
+
+/* -----------------------------------------------------------------
+   TABLET / NOTEBOOK PEQUENO (<= 1024px)
+   ----------------------------------------------------------------- */
+@media (max-width: 1024px) {
+  .content-body { padding: 28px 24px; }
+  .top-header { padding: 0 24px; }
+
+  .kpi-grid {
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 18px;
+  }
+
+  .chart-container { height: 260px; }
+  .settings-card { padding: 22px; }
+}
+
+/* -----------------------------------------------------------------
+   CELULAR / TABLET EM PÉ (<= 768px)
+   Complementa o bloco de 768px que já existe mais acima (gaveta da
+   sidebar, filter-bar em coluna, kanban empilhado).
+   ----------------------------------------------------------------- */
+@media (max-width: 768px) {
+  /* --- Cabeçalho: título em cima, KPI de faturamento na linha de
+     baixo. A altura fixa de 80px do desktop espremia os três blocos
+     lado a lado em 360px de largura. --- */
+  .top-header {
+    height: auto;
+    min-height: 64px;
+    flex-wrap: wrap;
+    padding: 12px 16px;
+    gap: 8px 12px;
+  }
+
+  .header-title-container { flex: 1 1 auto; min-width: 0; }
+  .page-title { font-size: 19px; }
+  .page-subtitle { font-size: 12px; }
+
+  .header-actions {
+    order: 3;
+    flex: 1 1 100%;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .stat-badge-header {
+    flex: 1;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 12px;
+  }
+
+  .stat-badge-header .label { font-size: 11px; }
+
+  /* --- Gaveta lateral: não deixa o conteúdo de trás rolar junto e
+     respeita a área segura (notch) dos aparelhos modernos. --- */
+  body.sidebar-open { overflow: hidden; }
+
+  .sidebar {
+    width: min(84vw, 280px);
+    overflow-y: auto;
+    padding-top: max(24px, env(safe-area-inset-top));
+    padding-bottom: max(24px, env(safe-area-inset-bottom));
+  }
+
+  /* --- Conteúdo e cards --- */
+  .content-body { padding: 16px; }
+
+  /* Duas colunas fixas: com `auto-fit` o tablet ainda encaixava os
+     quatro cards lado a lado e os rótulos quebravam em duas linhas. */
+  .kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .kpi-card { padding: 16px; }
+  .kpi-value { font-size: 22px; }
+  .kpi-label { font-size: 12px; }
+
+  .charts-grid { gap: 16px; margin-bottom: 20px; }
+  .chart-card { padding: 16px; }
+  .chart-container { height: 220px; }
+  .chart-title { font-size: 16px; }
+
+  .settings-card { padding: 18px; }
+  .settings-section-title { font-size: 16px; }
+
+  /* --- Barra de filtros: cada controle ocupa a linha inteira. --- */
+  .filter-bar { padding: 14px 16px; }
+
+  .filters-group {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filter-select-wrapper { width: 100%; justify-content: space-between; }
+  .filter-select { flex: 1; min-width: 0; text-align: right; }
+
+  /* --- Tabela de eventos: são 11 colunas; espremer tudo em 360px
+     deixa os valores ilegíveis. Melhor manter a largura mínima e
+     deixar o container rolar na horizontal. --- */
+  .clickup-table { min-width: 860px; }
+
+  /* --- Modais viram folha ancorada na base da tela (bottom sheet),
+     que é onde o polegar alcança. --- */
+  .modal-overlay { align-items: flex-end; }
+
+  .modal-content {
+    width: 100%;
+    max-width: 100%;
+    max-height: 92vh;
+    border-radius: 18px 18px 0 0;
+  }
+
+  .modal-header,
+  .modal-body,
+  .modal-footer { padding-left: 18px; padding-right: 18px; }
+
+  .modal-header { padding-top: 18px; padding-bottom: 18px; }
+  .modal-title { font-size: 17px; }
+  .modal-footer { padding-bottom: max(18px, env(safe-area-inset-bottom)); }
+
+  /* Login e popovers ficam no fim do styles-login.css: aquele arquivo
+     é carregado DEPOIS deste, e media query não aumenta especificidade
+     — as regras seriam sobrescritas se morassem aqui. */
+}
+
+/* -----------------------------------------------------------------
+   CELULAR PEQUENO (<= 480px)
+   ----------------------------------------------------------------- */
+@media (max-width: 480px) {
+  .content-body { padding: 14px 12px; }
+  .page-title { font-size: 17px; }
+
+  /* Uma coluna só — em 360px, dois cards lado a lado quebram o valor
+     monetário no meio. */
+  .kpi-grid { grid-template-columns: 1fr; }
+
+  /* Card compacto: com uma coluna só, o ícone empilhado por cima do
+     rótulo fazia cada card passar de 170px de altura e a dashboard
+     virava rolagem pura. O ícone vai para o canto (o card já é
+     position: relative) e a altura cai pela metade. */
+  .kpi-card { padding: 14px 16px; }
+
+  .kpi-icon-container {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 34px;
+    height: 34px;
+    margin-bottom: 0;
+  }
+
+  .kpi-label { padding-right: 46px; margin-bottom: 2px; }
+  .kpi-value { font-size: 21px; }
+  .kpi-meta { margin-top: 8px; }
+  .form-row-2, .form-row-3 { grid-template-columns: 1fr; }
+
+  /* --- Alvos de toque: 44px é o mínimo confortável para o dedo. --- */
+  .btn-primary,
+  .btn-secondary {
+    min-height: 44px;
+    justify-content: center;
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+
+  .menu-item { padding: 14px 16px; }
+  .modal-close { min-width: 40px; min-height: 40px; }
+
+  /* Botões do rodapé do modal empilhados; column-reverse mantém a
+     ação principal (Salvar) por cima, mais perto do polegar. */
+  .modal-footer { flex-direction: column-reverse; }
+  .modal-footer .btn-primary,
+  .modal-footer .btn-secondary { width: 100%; }
+
+  /* O iOS dá zoom automático em qualquer campo com fonte < 16px e não
+     volta sozinho. Os campos de edição inline da tabela ficam de fora
+     de propósito: aumentá-los estouraria a largura das colunas. */
+  .form-control,
+  .search-input,
+  .filter-select { font-size: 16px; }
+}
