@@ -3699,3 +3699,393 @@ img, video, iframe, canvas {
   .search-input,
   .filter-select { font-size: 16px; }
 }
+
+/* =====================================================================
+   PASSE MOBILE 2 — adaptação por tela (setembro/2026)
+   ---------------------------------------------------------------------
+   Este bloco fica no FIM do arquivo de propósito: media query não
+   aumenta especificidade, então quem vem depois vence os empates com as
+   regras de desktop escritas acima.
+   Cada correção abaixo veio de um print real em 360×800 e 390×844.
+   ===================================================================== */
+
+/* --- Botões de mover do card do Kanban --------------------------------
+   No desktop o card é arrastado; os botões só aparecem no toque. */
+.kanban-card-move { display: none; }
+
+@media (max-width: 768px) {
+
+  /* ===================================================================
+     1. ESTOURO HORIZONTAL DA PÁGINA (o pior problema encontrado)
+     O aviso de sincronização tinha `white-space: nowrap` e, junto do
+     badge de faturamento, empurrava a largura da página para 455px num
+     aparelho de 360px: TODA tela ficava deslocada, com uma faixa preta
+     morta à direita.
+     =================================================================== */
+  .main-wrapper { min-width: 0; max-width: 100%; }
+  .content-body { max-width: 100%; overflow-x: hidden; }
+  .top-header { max-width: 100%; }
+  .header-actions { flex-wrap: wrap; min-width: 0; }
+
+  /* Quando tem texto, o aviso toma a linha inteira e o badge desce. */
+  .sync-status { white-space: normal; margin-right: 0; }
+  .sync-status:not(:empty) { flex: 1 1 100%; }
+
+  .stat-badge-header { min-width: 0; }
+  .stat-badge-header .label { min-width: 0; }
+  .stat-badge-header .value { font-size: 15px; white-space: nowrap; }
+
+  /* ===================================================================
+     2. TABELA DE EVENTOS -> CARTÕES
+     Eram 11 colunas com 860px de largura mínima, rolagem lateral e
+     nenhuma pista visual de que dava para rolar: cachê, total, recebido
+     e a receber ficavam invisíveis no celular. Cada linha vira um
+     cartão com rótulo à esquerda e valor à direita (o rótulo sai do
+     `data-label` que o table.js escreve em cada <td>).
+     =================================================================== */
+  .table-responsive { overflow: visible; }
+
+  .clickup-table { min-width: 0; width: 100%; display: block; }
+  .clickup-table thead { display: none; }
+  .clickup-table tbody { display: block; }
+
+  .clickup-table tbody tr {
+    display: block;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 6px 14px;
+    margin: 0 12px 10px;
+  }
+
+  .clickup-table tbody td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    width: auto !important;
+    padding: 9px 0 !important;
+    text-align: left !important;
+    white-space: normal !important;
+    border: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .clickup-table tbody tr td:last-child { border-bottom: none; }
+
+  .clickup-table tbody td[data-label]::before {
+    content: attr(data-label);
+    flex: 0 0 auto;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  /* A célula do check não tem rótulo próprio: vira uma faixa no topo. */
+  .clickup-table tbody td.td-check {
+    justify-content: flex-start;
+    padding-bottom: 4px !important;
+  }
+  .clickup-table tbody td.td-check::before {
+    content: 'Show realizado';
+    order: 2;
+    margin-left: 10px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  /* Campos editáveis: 16px evita o zoom automático do iOS (agora cabe,
+     porque não estamos mais espremendo colunas) e 40px de altura dá
+     alvo de dedo. */
+  .clickup-table tbody td .inline-edit-input {
+    width: 46% !important;
+    min-width: 110px;
+    max-width: 60%;
+    font-size: 16px !important;
+    min-height: 40px;
+    text-align: right !important;
+    padding: 6px 10px;
+  }
+
+  .clickup-table tbody td .inline-edit-select,
+  .clickup-table tbody td .custom-dropdown-btn {
+    min-height: 38px;
+    max-width: 62%;
+    white-space: normal;
+    text-align: right !important;
+  }
+
+  .clickup-table tbody td .btn-secondary { min-height: 38px; }
+
+  /* Para quem não é admin a célula de ações vem vazia: o rótulo "AÇÕES"
+     sozinho só ocupa linha. (:empty não serve — a célula tem espaços.) */
+  .clickup-table tbody td.td-acoes:not(:has(button)) { display: none; }
+
+  /* Cabeçalho do grupo (evento e cliente): a coluna de ações à direita
+     comia metade da largura — o nome do cliente quebrava em quatro linhas
+     ("Prefeitura / Municipal / de / Garanhuns"). Agora a seta e as ações
+     ficam numa faixa própria e o título usa a linha inteira. */
+  .event-group-header { flex-wrap: wrap; padding: 14px 16px; }
+  .event-group-header > div:last-child { order: 1; margin-left: auto; margin-right: 0 !important; }
+  .event-group-title { order: 2; flex: 1 1 100%; gap: 4px 12px; }
+
+  /* Estado (UF) e o badge de contrato tinham 17px e 22px de altura. */
+  .event-group-field .custom-dropdown-btn { min-height: 34px; }
+  .event-group-field .badge-contract { padding: 8px 14px; }
+
+  /* Aceite dos termos: a caixa de marcar tinha 13x13. */
+  #terms-gate-modal input[type="checkbox"],
+  .modal-body input[type="checkbox"] { width: 22px; height: 22px; flex-shrink: 0; }
+  .event-group-separator { display: none; }
+  .event-group-field { min-width: 0; max-width: 100%; }
+  .hidden-inline-input { max-width: 100%; }
+
+  /* ===================================================================
+     3. KANBAN
+     As colunas herdavam `max-height: 100%` do quadro de desktop: uma vez
+     empilhadas, cada uma virava uma janelinha rolável de ~180px que
+     cortava os cards no meio. E, como o HTML5 drag-and-drop não dispara
+     no toque, o quadro era só leitura no celular — daí os botões de
+     mover (renderizados pelo board.js, escondidos no desktop).
+     =================================================================== */
+  #kanban-view { height: auto; }
+  .kanban-board { height: auto; overflow-x: visible; gap: 14px; padding-bottom: 0; }
+  .kanban-column { max-height: none; min-width: 0; }
+  .kanban-cards-container { overflow-y: visible; min-height: 0; }
+
+  /* Coluna vazia não precisa de 300px de altura só para dizer que está
+     vazia. */
+  .kanban-cards-container:empty { min-height: 0; padding: 14px 0; }
+  .kanban-cards-container:empty::before {
+    content: 'Nenhum evento nesta etapa';
+    min-height: 0;
+    padding: 14px;
+    font-size: 13px;
+  }
+
+  .kanban-card-move {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+  }
+
+  .kanban-move-btn {
+    flex: 1;
+    min-height: 40px;
+    padding: 8px 10px;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: inherit;
+    color: var(--text-white);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    border-radius: 9px;
+    cursor: pointer;
+  }
+  .kanban-move-btn:active { background: rgba(255, 204, 0, 0.16); }
+
+  /* ===================================================================
+     4. FINANCEIRO
+     "Passagem (avião)" virava "Passagem (aviã" e o campo de valor tinha
+     84×18px — impossível de acertar com o dedo. Rótulo em cima, campo
+     de largura total embaixo.
+     =================================================================== */
+  .fin-grid { grid-template-columns: 1fr; }
+  .fin-summary { grid-template-columns: 1fr; gap: 10px; margin-bottom: 18px; }
+  .fin-summary-item { padding: 14px 16px; }
+  .fin-summary-value { font-size: 24px; }
+
+  .fin-event-head { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .fin-event-total-wrap { text-align: left; }
+  .fin-event-body { padding: 8px 14px 16px; }
+
+  /* O recuo de 40px alinhava sob o avatar do artista; no celular ele
+     custava um sexto da largura útil. */
+  .fin-legs { padding-left: 0; gap: 10px; }
+  .fin-pending { margin-left: 0; }
+
+  .fin-leg { flex-wrap: wrap; row-gap: 8px; }
+  .fin-leg-label { flex: 1 1 auto; overflow: visible; }
+  .fin-leg-label > :last-child { overflow: visible; white-space: normal; }
+  .fin-input-wrap { flex: 1 1 100%; margin-left: 0; justify-content: flex-end; padding: 4px 12px; }
+  .fin-value-input { width: 100%; font-size: 16px; min-height: 38px; }
+
+  /* ===================================================================
+     5. LINHA DO TEMPO E FILTROS
+     O rótulo "Selecionar Artista para Linha do Tempo:" tem nowrap e
+     espremia o <select> a ponto de mostrar só "Todos os A". Rótulo em
+     cima, campo embaixo — vale para todos os filtros.
+     =================================================================== */
+  .filter-select-wrapper {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+    padding: 8px 12px;
+  }
+  .filter-select-wrapper label { white-space: normal; }
+  .filter-select {
+    width: 100%;
+    min-height: 40px;
+    font-size: 16px;
+    text-align: left;
+  }
+
+  /* Cartão da linha do tempo ganha ~45px de largura (a espinha e o
+     ponto continuam onde estavam). */
+  .timeline-item { padding-left: 54px; padding-right: 0; }
+
+  /* ===================================================================
+     6. ROTEIRO DE VIAGEM (prévia no modal)
+     Cabeçalho lado a lado e 30px de margem sobravam do desktop; a coluna
+     de rótulos da tabela tinha nowrap e empurrava o valor para fora.
+     =================================================================== */
+  .rt-folha { padding: 18px 16px; max-height: none; border-radius: 0; }
+  .rt-doc { font-size: 12.5px; }
+  .rt-cab { flex-direction: column; align-items: flex-start; gap: 14px; }
+  .rt-cab-dir { text-align: left; }
+  .rt-logo { height: 34px; }
+  .rt-artista { font-size: 21px; }
+  .rt-evento { font-size: 13px; }
+  .rt-campos th { width: 42%; white-space: normal; }
+
+  /* ===================================================================
+     7. ALVOS DE TOQUE
+     A recomendação (WCAG 2.5.8 / iOS HIG) é ~44px. Estes estavam entre
+     18px e 27px.
+     =================================================================== */
+  .action-icon-btn {
+    min-width: 40px;
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+  }
+
+  /* Continua sendo a bolinha (appearance: none + border-radius), só
+     maior — o dedo não acerta 18px. */
+  .color-dot-input { width: 26px; height: 26px; }
+
+  /* Especificidade dobrada de propósito: o styles-colorpicker.css carrega
+     depois deste arquivo e o `.event-checkbox` de lá venceria o empate. */
+  .clickup-table .event-checkbox { width: 26px; height: 26px; }
+  .clickup-table .event-checkbox svg { width: 15px; height: 15px; }
+
+  .modal-close { min-width: 44px; min-height: 44px; }
+
+  .list-manager-item { padding: 12px 16px; gap: 12px; }
+  .list-manager-name { display: flex; align-items: center; gap: 10px; min-width: 0; }
+
+  /* ===================================================================
+     8. BARRA DE FILTROS / BUSCA
+     =================================================================== */
+  .filter-bar .btn-primary { width: 100%; justify-content: center; }
+  .search-input { font-size: 16px; min-height: 44px; }
+
+  /* ===================================================================
+     9. ALTURA REAL DA JANELA
+     No celular a barra de endereco recolhe: 100vh e sempre a altura COM
+     ela recolhida, entao um bloco de 100vh nasce maior que a tela.
+     dvh acompanha a barra. (@supports para navegador antigo cair no vh.)
+     =================================================================== */
+  @supports (height: 100dvh) {
+    body { min-height: 100dvh; }
+    .main-wrapper { min-height: 100dvh; }
+  }
+}
+
+/* ---------------------------------------------------------------------
+   CELULAR PEQUENO (<= 480px)
+   --------------------------------------------------------------------- */
+@media (max-width: 480px) {
+  /* Cartões da tabela quase encostam nas bordas: mais largura útil para
+     os valores. */
+  .clickup-table tbody tr { margin-left: 8px; margin-right: 8px; padding: 6px 12px; }
+  .clickup-table tbody td { gap: 10px; }
+  .clickup-table tbody td[data-label]::before { font-size: 10px; }
+
+  .kanban-move-btn { font-size: 11px; padding: 8px 6px; }
+
+  .rt-folha { padding: 14px 12px; }
+  .rt-artista { font-size: 19px; }
+
+  /* Rótulo em cima do valor: em 360px a coluna de 42% não sobrava
+     espaço para endereços e nomes de motorista. */
+  .rt-campos, .rt-campos tbody { display: block; }
+  .rt-campos tr {
+    display: block;
+    padding: 6px 0;
+    border-bottom: 1px solid #ececf0;
+  }
+  .rt-campos tr:last-child { border-bottom: none; }
+  .rt-campos th, .rt-campos td {
+    display: block;
+    width: auto;
+    padding: 0;
+    border-bottom: none;
+  }
+  .rt-campos th { font-size: 11px; }
+}
+
+/* ---------------------------------------------------------------------
+   TELA BAIXA / CELULAR DEITADO
+   Com o teclado aberto, `max-height: 92vh` no modal deixava o rodapé
+   (com o botão Salvar) fora da tela.
+   --------------------------------------------------------------------- */
+@media (max-width: 900px) and (max-height: 520px) {
+  .modal-content { max-height: 96vh; }
+  .modal-header { padding-top: 12px; padding-bottom: 12px; }
+  .modal-body { padding-top: 12px; padding-bottom: 12px; }
+}
+
+/* ---------------------------------------------------------------------
+   PASSE MOBILE 2 — parte final: avisos (toast), links e campos inline
+   --------------------------------------------------------------------- */
+@media (max-width: 768px) {
+  /* --- Avisos ---------------------------------------------------------
+     O toast ficava ancorado no canto inferior direito com largura livre:
+     em 360px ele encostava nas duas bordas e o "x" de fechar tinha
+     11×23px. Agora ocupa a faixa inteira, acima da área do gesto de
+     voltar ao início (home indicator). */
+  .toast-msg {
+    left: 12px;
+    right: 12px;
+    bottom: max(16px, env(safe-area-inset-bottom));
+    padding: 14px 16px;
+  }
+
+  /* Os dois botões trazem `padding: 0` inline — daí o !important. */
+  #toast-close,
+  #toast-center-close {
+    min-width: 40px;
+    min-height: 40px;
+    margin-left: 8px !important;
+    padding: 0 8px !important;
+    font-size: 24px !important;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  /* --- Links de texto que são ação ------------------------------------
+     "Esqueci minha senha", "Criar Conta" e os links dos Termos tinham
+     15–20px de altura. O padding não muda o desenho, só a área do dedo. */
+  #link-forgot-password,
+  #link-register,
+  #terms-gate-modal .modal-body a {
+    display: inline-block;
+    padding: 8px 2px;
+  }
+
+  /* --- Campos editáveis do cabeçalho do evento ------------------------
+     São <input> disfarçados de texto (nome, data e local do show): 27px
+     de altura é pouco para acertar com o dedo. */
+  .hidden-inline-input { min-height: 36px; font-size: 16px; }
+}

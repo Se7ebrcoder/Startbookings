@@ -324,3 +324,13 @@ input[type="number"] {
     min-height: 72px;
   }
 }
+
+/* --- Telas de 320px (iPhone SE 1, Androids de entrada) ---
+   Ali sobram 256px dentro da caixa; 303 x 0,9 = 273 e o widget ficava com
+   o logo do hCaptcha cortado na direita. 303 x 0,8 = 242. */
+@media (max-width: 340px) {
+  .captcha-box {
+    transform: scale(0.8);
+    min-height: 64px;
+  }
+}

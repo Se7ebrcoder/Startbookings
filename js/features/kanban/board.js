@@ -7,6 +7,12 @@ import { eventGroupKey, checklistProgress, reminderState } from '../../utils/dom
 import { getEventCard, saveEventCard } from '../../data/eventCards.repo.js';
 import { openEventCardModal } from './card-modal.js';
 
+// Ordem das colunas. Serve ao arrastar (desktop) e aos botões de mover
+// (celular): o drag-and-drop do HTML5 não dispara em tela de toque, então sem
+// esses botões o Kanban era só leitura no telefone.
+const COLUNAS = ["todo", "progress", "done"];
+const COLUNA_LABEL = { todo: "A Fazer", progress: "Em Andamento", done: "Concluído" };
+
 // ----------------------------------------------------
 // KANBAN DRAG AND DROP LOGIC
 // ----------------------------------------------------
@@ -14,8 +20,15 @@ export function initKanban() {
   const board = document.getElementById("kanban-board");
   if (!board) return;
 
-  // Clique no card abre o editor do evento
+  // Clique no card abre o editor do evento — a não ser que tenha sido num
+  // dos botões de mover (que trocam a coluna sem abrir o modal).
   board.addEventListener("click", (ev) => {
+    const mover = ev.target.closest(".kanban-move-btn");
+    if (mover) {
+      ev.stopPropagation();
+      moverCard(mover.getAttribute("data-group"), Number(mover.getAttribute("data-dir")));
+      return;
+    }
     const card = ev.target.closest(".kanban-card");
     if (!card || card.classList.contains("dragging")) return;
     openEventCardModal(card.getAttribute("data-group"));
@@ -51,6 +64,18 @@ export function initKanban() {
   renderKanban();
 }
 
+// Move o card uma coluna para trás (-1) ou para frente (+1).
+function moverCard(groupId, direcao) {
+  const card = getEventCard(groupId);
+  if (!card) return;
+  const i = COLUNAS.indexOf(card.coluna);
+  const destino = COLUNAS[Math.min(COLUNAS.length - 1, Math.max(0, (i < 0 ? 0 : i) + direcao))];
+  if (!destino || destino === card.coluna) return;
+  card.coluna = destino;
+  saveEventCard(card);
+  renderKanban();
+}
+
 export function renderKanban() {
   const board = document.getElementById("kanban-board");
   if (!board) return;
@@ -79,11 +104,20 @@ export function renderKanban() {
     el.className = "kanban-card";
     el.setAttribute("draggable", "true");
     el.setAttribute("data-group", card.groupId);
+    const iCol = COLUNAS.indexOf(card.coluna);
+    const anterior = COLUNAS[iCol - 1];
+    const proxima = COLUNAS[iCol + 1];
     el.innerHTML = `
       <div class="kanban-card-title">${escapeHtml(name)} ${bell}</div>
       <div class="kanban-card-desc">${date ? formatDate(date) : ""}${artists ? " · " + escapeHtml(artists) : ""}</div>
       <div class="kanban-progress"><div class="kanban-progress-bar" style="width:${pct}%"></div></div>
       <div class="kanban-progress-label">${feitos}/${total} etapas</div>
+      <div class="kanban-card-move">
+        ${anterior ? `<button type="button" class="kanban-move-btn" data-group="${escapeHtml(card.groupId)}" data-dir="-1"
+            title="Mover para ${COLUNA_LABEL[anterior]}" aria-label="Mover para ${COLUNA_LABEL[anterior]}">&larr; ${COLUNA_LABEL[anterior]}</button>` : '<span></span>'}
+        ${proxima ? `<button type="button" class="kanban-move-btn" data-group="${escapeHtml(card.groupId)}" data-dir="1"
+            title="Mover para ${COLUNA_LABEL[proxima]}" aria-label="Mover para ${COLUNA_LABEL[proxima]}">${COLUNA_LABEL[proxima]} &rarr;</button>` : '<span></span>'}
+      </div>
     `;
     col.appendChild(el);
   });

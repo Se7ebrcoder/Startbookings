@@ -392,20 +392,20 @@ export function renderEventTable() {
 
       if (isArtist) {
         row.innerHTML = `
-          <td style="text-align: center;">
+          <td class="td-check" style="text-align: center;">
             <div class="event-checkbox ${checkClass}" style="cursor: default;">
               ${checkIcon}
             </div>
           </td>
-          <td>${safeArtist}</td>
-          <td>${safeSeller}</td>
-          <td><span class="status-tag status-${e.status}">${STATUS_LABELS[e.status]}</span></td>
-          <td class="price-text text-left">${formatCurrency(cachet)}</td>
-          <td class="price-text text-left" style="color: var(--text-muted);">${logiCost > 0 ? '+' + formatCurrency(logiCost) : '—'}</td>
-          <td class="price-text text-left" style="font-weight: 700;">${formatCurrency(totalValue)}</td>
-          <td class="price-text text-left" style="color: #30d158;">${formatCurrency(amountReceived)}</td>
-          <td class="price-text text-left" style="color: #ff453a;">${formatCurrency(amountToReceive)}</td>
-          <td style="font-size: 11px; color: var(--text-muted);">${safeNotes}</td>
+          <td data-label="Artista">${safeArtist}</td>
+          <td data-label="Vendido por">${safeSeller}</td>
+          <td data-label="Status"><span class="status-tag status-${e.status}">${STATUS_LABELS[e.status]}</span></td>
+          <td data-label="Cachê" class="price-text text-left">${formatCurrency(cachet)}</td>
+          <td data-label="Log. (R$)" class="price-text text-left" style="color: var(--text-muted);">${logiCost > 0 ? '+' + formatCurrency(logiCost) : '—'}</td>
+          <td data-label="Total" class="price-text text-left" style="font-weight: 700;">${formatCurrency(totalValue)}</td>
+          <td data-label="Recebido" class="price-text text-left" style="color: #30d158;">${formatCurrency(amountReceived)}</td>
+          <td data-label="A receber" class="price-text text-left" style="color: #ff453a;">${formatCurrency(amountToReceive)}</td>
+          <td data-label="Obs." style="font-size: 11px; color: var(--text-muted);">${safeNotes}</td>
         `;
       } else {
         const aColor = appState.tagColors[e.artist] || "#4a4a52";
@@ -415,29 +415,29 @@ export function renderEventTable() {
         const sellerStyle = `background-color: ${sColor}; border-color: ${sColor}; color: #ffffff;`;
 
         row.innerHTML = `
-          <td style="text-align: center;">
+          <td class="td-check" style="text-align: center;">
             <div class="event-checkbox ${checkClass}" data-id="${safeId}">
               ${checkIcon}
             </div>
           </td>
-          <td><button class="inline-edit-select custom-dropdown-btn" style="${artistStyle} text-align: left;" data-id="${safeId}" data-field="artist">${safeArtist || '<span style="color:var(--text-muted);font-weight:normal;">Selecione</span>'}</button></td>
-          <td><button class="inline-edit-select custom-dropdown-btn" style="${sellerStyle} text-align: left;" data-id="${safeId}" data-field="vendedor">${safeSeller || '<span style="color:var(--text-muted);font-weight:normal;">Selecione</span>'}</button></td>
-          <td>
+          <td data-label="Artista"><button class="inline-edit-select custom-dropdown-btn" style="${artistStyle} text-align: left;" data-id="${safeId}" data-field="artist">${safeArtist || '<span style="color:var(--text-muted);font-weight:normal;">Selecione</span>'}</button></td>
+          <td data-label="Vendido por"><button class="inline-edit-select custom-dropdown-btn" style="${sellerStyle} text-align: left;" data-id="${safeId}" data-field="vendedor">${safeSeller || '<span style="color:var(--text-muted);font-weight:normal;">Selecione</span>'}</button></td>
+          <td data-label="Status">
             <button class="inline-edit-select custom-dropdown-btn status-tag status-${e.status}" style="text-align: left;" data-id="${safeId}" data-field="status">${STATUS_LABELS[e.status] || escapeHtml(e.status)}</button>
           </td>
-          <td class="text-left">
+          <td data-label="Cachê" class="text-left">
             <input type="number" class="inline-edit-input" name="amount-${safeId}" style="text-align: left; font-weight: 700; width: 100px; color: var(--text-main);" data-id="${safeId}" data-field="amount" value="${e.amount}">
           </td>
-          <td class="price-text text-left" style="color: var(--text-muted);">${logiCost > 0 ? '+' + formatCurrency(logiCost) : '—'}</td>
-          <td class="price-text text-left" style="font-weight: 700;">${formatCurrency(totalValue)}</td>
-          <td class="text-left">
+          <td data-label="Log. (R$)" class="price-text text-left" style="color: var(--text-muted);">${logiCost > 0 ? '+' + formatCurrency(logiCost) : '—'}</td>
+          <td data-label="Total" class="price-text text-left" style="font-weight: 700;">${formatCurrency(totalValue)}</td>
+          <td data-label="Recebido" class="text-left">
             <input type="number" class="inline-edit-input" name="amountReceived-${safeId}" style="text-align: left; font-weight: 700; width: 100px; color: #30d158;" data-id="${safeId}" data-field="amountReceived" value="${amountReceived}">
           </td>
-          <td class="price-text text-left" style="color: #ff453a; font-weight: 700;">${formatCurrency(amountToReceive)}</td>
-          <td>
+          <td data-label="A receber" class="price-text text-left" style="color: #ff453a; font-weight: 700;">${formatCurrency(amountToReceive)}</td>
+          <td data-label="Obs." class="text-left">
             <input type="text" class="inline-edit-input" name="financeNotes-${safeId}" style="width: 120px; font-size: 11px;" placeholder="Obs..." data-id="${safeId}" data-field="financeNotes" value="${safeNotes}">
           </td>
-          <td style="font-size:11px; white-space:nowrap;">
+          <td data-label="Logística" style="font-size:11px; white-space:nowrap;">
             ${(() => {
             const st = getArtistLogisticsStatus(e.groupId || "", e.artist);
             if (st === 'concluida') return `<button class="btn-secondary logi-view-btn" data-key="${escapeHtml(e.groupId || '')}" data-artist="${escapeHtml(e.artist || '')}" style="padding:4px 10px; font-size:11px;">Ver Logística</button>`;
@@ -445,7 +445,7 @@ export function renderEventTable() {
             return `<span style="color:${color};">${LOGI_STATUS_LABELS[st]}</span>`;
           })()}
           </td>
-          ${isArtist ? '' : `<td style="text-align: center;">
+          ${isArtist ? '' : `<td data-label="Ações" class="td-acoes" style="text-align: center;">
             ${(!appState.currentRole || !appState.currentRole.includes("(Admin)")) ? '' : `<button class="action-icon-btn delete-btn" style="margin: 0 auto;" data-id="${safeId}" title="Excluir Show" aria-label="Excluir show">
               <svg viewBox="0 0 24 24">
                 <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"></path>
