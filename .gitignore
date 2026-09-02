@@ -10,6 +10,7 @@ node_modules/
 scripts/.backup-env.ps1
 *.dump
 StartBookings-Backups/
+StartBookings-Documentos/
 
 # Build / cache da Vercel
 .vercel
