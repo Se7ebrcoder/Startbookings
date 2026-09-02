@@ -3444,9 +3444,42 @@ body.role-logistica .stat-badge-header {
     print-color-adjust: exact;
   }
 
-  .rt-doc { max-width: none; font-size: 11.5pt; }
-  .rt-artista { font-size: 21pt; }
+  /* ESCALA NO PAPEL — o documento e curto e, no tamanho de tela, ficava
+     espremido no topo do A4 com meia folha vazia. Aqui ele e ampliado para
+     ocupar a pagina com a mesma proporcao confortavel da leitura em tela. */
+  .rt-doc { max-width: none; font-size: 12.5pt; line-height: 1.6; }
   .rt-folha { padding: 0; max-height: none; overflow: visible; }
+
+  .rt-logo { height: 58px; }
+  .rt-tipo { font-size: 15.5pt; }
+  .rt-emissao { font-size: 10pt; }
+  .rt-cab { padding-bottom: 16px; }
+
+  .rt-identificacao { padding: 24px 0 8px; }
+  .rt-artista { font-size: 30pt; }
+  .rt-evento { font-size: 14pt; margin-top: 5px; }
+  .rt-local { font-size: 12pt; margin-top: 3px; }
+
+  .rt-bloco { margin-top: 30px; }
+  .rt-bloco-cab { gap: 12px; margin-bottom: 12px; }
+  .rt-num { width: 27px; height: 27px; font-size: 13pt; }
+  .rt-bloco-cab h3 { font-size: 14.5pt; }
+  .rt-modo { font-size: 10pt; padding: 4px 10px; }
+
+  .rt-destaque { padding: 13px 18px; margin-bottom: 12px; border-left-width: 4px; }
+  .rt-destaque strong { font-size: 16pt; }
+  .rt-destaque span { font-size: 13pt; }
+
+  .rt-campos th, .rt-campos td { font-size: 12.5pt; padding: 7px 12px 7px 0; }
+  .rt-campos td { padding-left: 0; }
+
+  .rt-sub { font-size: 10pt; margin-bottom: 8px; }
+  .rt-conexao { padding: 12px 16px; margin-bottom: 10px; }
+  .rt-conexao-topo { font-size: 10.5pt; margin-bottom: 8px; }
+  .rt-conexao-topo span { font-size: 13.5pt; }
+
+  .rt-vazio { font-size: 12.5pt; }
+  .rt-rodape { margin-top: 34px; padding-top: 14px; font-size: 10pt; }
 
   /* Nao deixa um bloco comecar no rodape e continuar na pagina seguinte */
   .rt-bloco, .rt-conexao { page-break-inside: avoid; break-inside: avoid; }
