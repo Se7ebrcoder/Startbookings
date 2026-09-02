@@ -26,6 +26,33 @@ const MODOS = {
   onibus: 'Ônibus',
 };
 
+const UF_NOME = {
+  AC:'Acre', AL:'Alagoas', AP:'Amapá', AM:'Amazonas', BA:'Bahia', CE:'Ceará',
+  DF:'Distrito Federal', ES:'Espírito Santo', GO:'Goiás', MA:'Maranhão',
+  MT:'Mato Grosso', MS:'Mato Grosso do Sul', MG:'Minas Gerais', PA:'Pará',
+  PB:'Paraíba', PR:'Paraná', PE:'Pernambuco', PI:'Piauí', RJ:'Rio de Janeiro',
+  RN:'Rio Grande do Norte', RS:'Rio Grande do Sul', RO:'Rondônia', RR:'Roraima',
+  SC:'Santa Catarina', SP:'São Paulo', SE:'Sergipe', TO:'Tocantins',
+};
+
+// Monta "Cidade, Estado (UF)". O campo `venue` costuma vir com a UF colada
+// ("Garanhuns -PE"), o que gerava "Garanhuns -PE — PE" com o estado repetido.
+function localFormatado(ev) {
+  if (!ev) return '';
+  const uf = String(ev.estado || '').trim().toUpperCase();
+  let lugar = String(ev.venue || '').trim();
+  if (uf) {
+    // remove a UF grudada no fim do venue: "-PE", " - PE", "/PE", ", PE"
+    lugar = lugar.replace(new RegExp('[\s,/-]+' + uf + '\s*$', 'i'), '').trim();
+  }
+  const estado = UF_NOME[uf];
+  if (lugar && estado) return `${lugar}, ${estado} (${uf})`;
+  if (lugar && uf)     return `${lugar} (${uf})`;
+  if (lugar)           return lugar;
+  if (estado)          return `${estado} (${uf})`;
+  return uf;
+}
+
 const vazio = (v) => v === null || v === undefined || String(v).trim() === '';
 const txt = (v) => escapeHtml(vazio(v) ? '—' : v);
 
@@ -100,14 +127,23 @@ function blocoTrecho(numero, titulo, leg) {
       <p class="rt-vazio">Trecho não preenchido.</p></section>`;
   }
   const d = destaqueDoTrecho(leg);
+  const modo = escapeHtml(MODOS[leg.modo] || leg.modo);
+  // O modo vive DENTRO da faixa, como titulo do trecho, com o detalhe
+  // (voo/horarios/trajeto) logo abaixo. Antes era um badge solto no
+  // cabecalho, longe da informacao a que se refere.
   const faixa = d
-    ? `<div class="rt-destaque"><strong>${d.principal}</strong>${d.secundario ? `<span>${d.secundario}</span>` : ''}</div>`
-    : `<p class="rt-vazio">Transporte direto, sem detalhes a informar.</p>`;
+    ? `<div class="rt-destaque">
+         <div class="rt-destaque-modo">${modo}</div>
+         <div class="rt-destaque-info">${d.principal}${d.secundario ? ` <span>${d.secundario}</span>` : ''}</div>
+       </div>`
+    : `<div class="rt-destaque">
+         <div class="rt-destaque-modo">${modo}</div>
+         <div class="rt-destaque-info rt-fraco">Transporte direto, sem detalhes a informar.</div>
+       </div>`;
   return `<section class="rt-bloco">
     <div class="rt-bloco-cab">
       <span class="rt-num">${numero}</span>
       <h3>${escapeHtml(titulo)}</h3>
-      <span class="rt-modo">${escapeHtml(MODOS[leg.modo] || leg.modo)}</span>
     </div>
     ${faixa}
     ${tabelaCampos(camposDoTrecho(leg))}
@@ -133,8 +169,8 @@ function blocoHospedagem(numero, dados) {
   return `<section class="rt-bloco">
     <div class="rt-bloco-cab"><span class="rt-num">${numero}</span><h3>Hospedagem</h3></div>
     <div class="rt-destaque">
-      <strong>${txt(h.nome)}</strong>
-      ${temCheck ? `<span>check-in ${vazio(h.checkin) ? '—' : escapeHtml(h.checkin)} &middot; check-out ${vazio(h.checkout) ? '—' : escapeHtml(h.checkout)}</span>` : ''}
+      <div class="rt-destaque-modo">${txt(h.nome)}</div>
+      ${temCheck ? `<div class="rt-destaque-info">check-in ${vazio(h.checkin) ? '—' : escapeHtml(h.checkin)} &middot; check-out ${vazio(h.checkout) ? '—' : escapeHtml(h.checkout)}</div>` : ''}
     </div>
     ${tabelaCampos([['Endereço', h.endereco]])}
   </section>`;
@@ -145,7 +181,7 @@ export function roteiroDocumentoHTML(record, ev) {
   const d = (record && record.data) || {};
   const nomeEvento = ev ? ev.eventName : '';
   const dataEvento = ev && ev.eventDate ? formatDate(ev.eventDate) : '';
-  const local = ev ? [ev.venue, ev.estado].filter(x => !vazio(x)).join(' — ') : '';
+  const local = localFormatado(ev);
   const emitido = new Date().toLocaleDateString('pt-BR');
 
   return `<article class="rt-doc">

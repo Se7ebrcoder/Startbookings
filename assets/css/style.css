@@ -3348,13 +3348,17 @@ body.role-logistica .stat-badge-header {
 
 /* A linha que se le de relance: voo/horarios, hotel/check-in */
 .rt-destaque {
-  display: flex; align-items: baseline; justify-content: space-between;
-  gap: 14px; flex-wrap: wrap;
   border-left: 3px solid #bf9100; background: #faf7ec;
-  padding: 8px 12px; margin-bottom: 8px;
+  padding: 10px 14px; margin-bottom: 8px;
 }
-.rt-destaque strong { font-size: 15.5px; }
-.rt-destaque span { font-size: 13px; color: #45454c; white-space: nowrap; }
+/* Primeira linha: o MODO de transporte (ou o hotel). Segunda: o detalhe. */
+.rt-destaque-modo {
+  font-size: 13.5px; font-weight: 700;
+  letter-spacing: .04em; text-transform: uppercase;
+}
+.rt-destaque-info { font-size: 14px; margin-top: 2px; }
+.rt-destaque-info span { color: #45454c; }
+.rt-fraco { color: #6b6b72; font-style: italic; }
 
 /* Tabela rotulo/valor */
 .rt-campos { width: 100%; border-collapse: collapse; }
@@ -3401,7 +3405,9 @@ body.role-logistica .stat-badge-header {
    IMPRESSAO / PDF
    ==================================================================== */
 @media print {
-  @page { size: A4; margin: 14mm 15mm; }
+  /* Margens simetricas e enxutas: o modelo aprovado tem o conteudo mais
+     proximo das bordas, aproveitando melhor a folha. */
+  @page { size: A4; margin: 12mm; }
 
   /* O site e escuro. `visibility: hidden` esconde os ELEMENTOS, mas nao o
      fundo do proprio html/body — que era impresso como uma mancha preta
@@ -3464,11 +3470,10 @@ body.role-logistica .stat-badge-header {
   .rt-bloco-cab { gap: 12px; margin-bottom: 12px; }
   .rt-num { width: 27px; height: 27px; font-size: 13pt; }
   .rt-bloco-cab h3 { font-size: 14.5pt; }
-  .rt-modo { font-size: 10pt; padding: 4px 10px; }
 
-  .rt-destaque { padding: 13px 18px; margin-bottom: 12px; border-left-width: 4px; }
-  .rt-destaque strong { font-size: 16pt; }
-  .rt-destaque span { font-size: 13pt; }
+  .rt-destaque { padding: 14px 18px; margin-bottom: 12px; border-left-width: 4px; }
+  .rt-destaque-modo { font-size: 13.5pt; }
+  .rt-destaque-info { font-size: 13.5pt; margin-top: 3px; }
 
   .rt-campos th, .rt-campos td { font-size: 12.5pt; padding: 7px 12px 7px 0; }
   .rt-campos td { padding-left: 0; }
