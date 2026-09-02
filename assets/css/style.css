@@ -2953,6 +2953,20 @@ body.role-logistica .stat-badge-header {
 #logistics-print-area { display: none; }
 .logi-dossier h4 { font-size: 14px; }
 
+/* Seletor de cor redondo (lista de artistas/equipe) — abre a paleta nativa completa */
+.color-dot-input {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1px solid var(--border-color);
+  padding: 0;
+  cursor: pointer;
+  background: none;
+  vertical-align: middle;
+}
 .color-dot-input:hover { box-shadow: 0 0 0 2px rgba(255, 204, 0, 0.3); }
 .color-dot-input::-webkit-color-swatch-wrapper { padding: 0; }
 .color-dot-input::-webkit-color-swatch { border: none; border-radius: 50%; }
